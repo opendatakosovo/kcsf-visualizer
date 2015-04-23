@@ -1,0 +1,340 @@
+{% extends "layout.html" %}
+{% block body %}
+  <script src="http://code.highcharts.com/highcharts.js"></script>
+  <script src="http://code.highcharts.com/modules/exporting.js"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <style type="text/css">
+      #button {
+      width: 12em;
+      border-right: 1px solid #222222;
+      padding: 0 0 1em 0;
+      margin-bottom: 1em;
+      font-family: 'Trebuchet MS', 'Lucida Grande', Verdana, Arial, sans-serif;
+      background-color: #222222;
+      color: #333;
+    }
+
+    #button ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+      
+    #button li {
+      border-bottom: 1px solid #90bade;
+      margin: 0;
+      list-style: none;
+      list-style-image: none;
+    }
+      
+    #button li a {
+      display: block;
+      padding: 5px 5px 5px 0.5em;
+      border-left: 10px solid #222222;
+      border-right: 10px solid #222222;
+      background-color: #222222;
+      color: #fff;
+      text-decoration: none;
+      width: 100%;
+    }
+
+    html>body #button li a {
+      width: auto;
+    }
+
+    #button li a:hover {
+      background-color: #2586d7;
+      color: #fff;
+    }
+  </style>
+  <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
+  <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
+  <script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+      var data;
+      
+      function getImgData(chartContainer) {
+        var chartArea = chartContainer.getElementsByTagName('svg')[0].parentNode;
+        var svg = chartArea.innerHTML;
+        var doc = chartContainer.ownerDocument;
+        var canvas = doc.createElement('canvas');
+        canvas.setAttribute('width', chartArea.offsetWidth);
+        canvas.setAttribute('height', chartArea.offsetHeight);
+        
+        
+        canvas.setAttribute(
+            'style',
+            'position: absolute; ' +
+            'top: ' + (-chartArea.offsetHeight * 2) + 'px;' +
+            'left: ' + (-chartArea.offsetWidth * 2) + 'px;');
+        doc.body.appendChild(canvas);
+        canvg(canvas, svg);
+        var imgData = canvas.toDataURL("image/png");
+        canvas.parentNode.removeChild(canvas);
+        return imgData;
+      }
+      
+      function saveAsImg(chartContainer) {
+        var imgData = getImgData(chartContainer);
+        
+        // Replacing the mime-type will force the browser to trigger a download
+        // rather than displaying the image in the browser window.
+        window.location = imgData.replace("image/png", "image/octet-stream");
+      }
+      
+      function toImg(chartContainer, imgContainer) { 
+        var doc = chartContainer.ownerDocument;
+        var img = doc.createElement('img');
+        img.src = getImgData(chartContainer);
+        
+        while (imgContainer.firstChild) {
+          imgContainer.removeChild(imgContainer.firstChild);
+        }
+        imgContainer.appendChild(img);
+      }
+      /*
+      function drawPieChart(){
+      var group_by = $('#group-select').val();
+      var url = "api/data/" + group_by;
+      var chart_type1 = $('#chart-type-select').val();
+      var point_format = '';
+      var type1 = "";
+      var tooltip = {}
+      var legend1 = {}
+      if (chart_type1 == "pie"){
+        type1 = "pie";
+        point_format = '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
+        tooltip = { 
+                  pie: {
+                      allowPointSelect: true,
+                      cursor: 'pointer',
+                      dataLabels: {
+                        enabled: true,
+                        formatter: function() {
+                            return Math.round(this.percentage*100)/100 + '%';
+                        },
+                        distance: 40,
+                        color: 'black'
+                      },
+                      showInLegend: true
+                  }
+            }
+
+        if (group_by == "type" || group_by == "organi-vendimmarres"){
+          legend1 = {
+              align: 'right',
+              verticalAlign: 'top',
+              width: 250,
+              y: 50,
+              layout: 'vertical',
+              itemStyle: {
+                  fontSize: "11px",
+                  color: '#000000'
+              }
+            }
+        } else {
+          legend1 = {
+              align: 'right',
+              verticalAlign: 'top',
+              y: 50,
+              layout: 'vertical',
+              itemStyle: {
+                  fontSize: "13px",
+                  color: '#000000'
+              }
+            }
+          }
+      } else {
+        type1 = "column"
+        point_format = '{series.name}: <b>{point.y} </b>';
+        tooltip = {
+                    column: {
+                      pointPadding: 0,
+                      format: '<b>{point.name}</b>: ({point.percentage:.1f} %)',
+                      borderWidth: 0
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function() {
+                            return Math.round(this.percentage*100)/100 + '%';
+                        },
+                        distance: 40,
+                        color: 'black'
+                      },
+              } 
+        legend1 = {
+                align: 'right',
+                verticalAlign: 'top',
+                y: 50,
+                layout: 'vertical',
+                itemStyle: {
+                    fontSize: "10px",
+                    color: '#000000'
+                }
+            }
+      }
+      $.get(url, function(jsonResult){
+          data = [];
+          var categoriesArray = []
+          $.each(jsonResult, function(idx, itm){
+              data[idx] = [itm['type'], itm['count']];
+              categoriesArray.push(itm['type']);
+          });
+          var xAxis1;
+          if (chart_type1 == "column"){
+            xAxis1 = {
+                  categories: categoriesArray,
+                  crosshair: false
+              }
+          } else {
+            xAxis1 = {}
+          }
+
+          $('#chart-container').highcharts({
+              chart: {
+                  plotBackgroundColor: null,
+                  plotBorderWidth: null,
+                  plotShadow: false
+              },
+              legend: legend1,
+              title: {
+                  text: ''
+              },
+              tooltip: {
+                  pointFormat: point_format
+              },
+              plotOptions: tooltip,
+              title: {
+                  text: 'Distribution',
+                  x: -20 //center
+              },
+              xAxis: xAxis1,
+              series: [{
+                  type: type1,
+                  name: 'Distribution',
+                  data: data
+              }]
+            });
+        });
+      }
+  */
+      $(document).ready(function(){
+          drawChart();
+          //drawPieChart();
+
+          $('#group-select').change(function(){
+            drawChart();
+            //drawPieChart();
+          })
+
+          $('#chart-type-select').change(function(){
+            drawChart();
+            //drawPieChart();
+          })
+
+          $("button.export").click(function() {
+              var csvContent = "data:text/csv;charset=utf-8,";
+              var csvContent = csvContent + ConvertToCSV(data);
+              var encodedCsvUri = encodeURI(csvContent);
+              $('#container').highcharts()
+                .exportChart({
+                    scale: $(this).data().scale
+                });
+              window.open(encodedCsvUri);
+          });
+      });
+
+      function ConvertToCSV(objArray) {
+            var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+            var str = '';
+
+            for (var i = 0; i < array.length; i++) {
+                var line = '';
+                for (var index in array[i]) {
+                    if (line != '') line += ','
+
+                    line += array[i][index];
+                }
+                str += line + '\r\n';
+            }
+            return str;
+        }
+    function drawChart(){
+      var group_by = $('#group-select').val();
+      var chart_type = $('#chart-type-select').val();
+        url = "/api/data/" + group_by;
+        $.get(url, function(results){ 
+          var dataTable = new google.visualization.DataTable()
+          dataTable.addColumn('string', 'Type');
+          dataTable.addColumn('number', 'Count');
+
+          for(var idx in results){
+            var type = results[idx]['type'];
+            var sum = results[idx]['count'];
+            type = type.toString();
+            dataTable.addRow([type, sum]);
+          }
+
+          var options = {
+            title: "Pie Chart for municipality count"
+          };
+
+          if (chart_type == "pie"){
+            var chart = new google.visualization.PieChart(document.getElementById("piechart"));
+          } else {
+            var chart = new google.visualization.ColumnChart(document.getElementById("piechart"));
+          }
+          chart.draw(dataTable, options);
+        })
+      };
+    </script>
+<div id="index-container" style="width:1080px; margin:-20px 50px 0 -50px; padding-top:100px; height:100%">
+  <div class="row col-md-13" style="border-top-left-radius: 5px;">
+    <div class="col-md-3" style="background-color: #222222; height:650px">
+      <div id="filter" style="height: 650px;">
+        <div id="button" style="width:100%">
+        <br><br>
+          <ul>
+            <li><a>Home</a></li>
+            <li><a>
+              <select id="group-select" class="form-control">
+                  <option value="municipality" selected="selected">Municipality</option>
+                  <option value="type">Type</option>
+                  <option value="q33">Question 33</option>
+                  <option value="fondacion">Fondacion</option>
+                  <option value="year">Year</option>
+                  <option value="registration-form">Forma e Regjistrimit</option>
+                  <option value="organi-vendimmarres">Organi Vendimmarres</option>
+                  <option value="isRegistered">Is Registered</option>
+              </select>
+            </a></li>
+            <br>
+            <li><button style="margin-left: 70px;" id="btn_filter" class="btn btn-primary">Filter</button><br></li>
+
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-9" style="background-color:#FFF; height:1250px">
+      <div id="top-menu" style="height:50px; width:832px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
+                  <select id="chart-type-select">
+                    <option value="pie" selected="selected">Pie Chart</option>
+                    <option value="column">Column Chart</option>
+                  </select>
+      </div>
+      <div id="chart-container-div" style="height:100%; width:100%;">
+        {#<div id="chart-container" style="width:100%; height:550px;"></div>#}
+        <div id="img_div" style="position: fixed; top: 0; right: 0; z-index: 10; border: 1px solid #b9b9b9">
+          Image will be placed here
+        </div>
+        <div id="piechart" style="width:100%; height:550px;"></div>
+        
+        <button onclick="saveAsImg(document.getElementById('piechart'));">Save as PNG Image</button>
+        <button onclick="toImg(document.getElementById('pie_div'), document.getElementById('img_div'));">Convert to image</button>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
