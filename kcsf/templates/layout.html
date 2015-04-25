@@ -4,10 +4,6 @@
 <head>
 <title>Ballina - KCSF - Kosovar Civil Society Foundation</title>
 
-
-
-
-
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
 <meta name="description" content="Fondacioni Kosovar p&euml;r Shoq&euml;ri Civile - KCSF &euml;sht&euml; organizat&euml; e pavarur, jo-fitimprur&euml;se e fokusuar n&euml; p&euml;rkrahjen e iniciativave civile lokale q&euml; &ccedil;ojn&euml; n&euml; nj&euml; l&euml;vizje e fuqishme t&euml; shoq&euml;ris&euml; civile q&euml; do t&euml; promovoj&euml; nj&euml; kultur&euml; demokratike dhe p&euml;r t&#146;iu p&euml;rgjigjur nevojave socio-ekonomike t&euml; Kosov&euml;s. Perspektiva e integrimit europian t&euml; Kosov&euml;s i ka..." />
 <meta name="keywords" content="Fondacioni Kosovar p&euml;r Shoq&euml;ri Civile - KCSF &euml;sht&euml; organizat&euml; e pavarur, jo-fitimprur&euml;se e fokusuar n&euml; p&euml;rkrahjen e iniciativave civile lokale q&euml; &ccedil;ojn&euml; n&euml; nj&euml; l&euml;vizje e fuqishme t&euml; shoq&euml;ris&euml; civile q&euml; do t&euml; promovoj&euml; nj&euml; kultur&euml; demokratike dhe p&euml;r t&#146;iu p&euml;rgjigjur nevojave socio-ekonomike t&euml; Kosov&euml;s. Perspektiva e integrimit europian t&euml; Kosov&euml;s i ka..." />
@@ -21,7 +17,6 @@
 <meta property="og:title" content="Ballina - KCSF - Kosovar Civil Society Foundation"/><meta property="og:image" content="http://www.kcsfoundation.org/inc/images/logo.png"/><meta property="og:site_name" content="KCSF - Kosovar Civil Society Foundation"/><meta property="og:description" content="Fondacioni Kosovar p&euml;r Shoq&euml;ri Civile - KCSF &euml;sht&euml; organizat&euml; e pavarur, jo-fitimprur&euml;se e fokusuar n&euml; p&euml;rkrahjen e iniciativave civile lokale q&euml; &ccedil;ojn&euml; n&euml; nj&euml; l&euml;vizje e fuqishme t&euml; shoq&euml;ris&euml; civile q&euml; do t&euml; promovoj&euml; nj&euml; kultur&euml; demokratike dhe p&euml;r t&#146;iu p&euml;rgjigjur nevojave socio-ekonomike t&euml; Kosov&euml;s. Perspektiva e integrimit europian t&euml; Kosov&euml;s i ka..."/>
 <meta name="robots" content="All" />
 <meta http-equiv="pragma" content="cache" />
-<script src="{{ url_for('static', filename='analytics-controls/analytics-controls.js') }}"></script>
 <!-- Bootstrap Core CSS --><!-- jQuery -->
 
 <script src="{{ url_for('static', filename='bootstrap/js/jquery.js') }}"></script>
@@ -29,16 +24,14 @@
 <!-- Bootstrap Core JavaScript -->
 <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
 <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='analytics-controls/analytics-controls.css') }}" />
 <link rel="stylesheet" href="http://www.kcsfoundation.org/inc/css/style.css" type="text/css" title="standard" />
 <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
 
-<script type="text/javascript" src="http://www.kcsfoundation.org/inc/js/jquery-1.9.1.min.js"></script>
+<script src="{{ url_for('static', filename='jquery-ui-1.11.4/jquery-ui.min.js') }}"></script>
 <script type="text/javascript" src="http://www.kcsfoundation.org/inc/js/jquery-ui-1.9.2.custom.min.js"></script>
 <script type="text/javascript" src="http://www.kcsfoundation.org/inc/js/jquery.fancybox.pack.js"></script>
 <script type="text/javascript" src="http://www.kcsfoundation.org/inc/js/jquery.cycle.all.2.74.js.php"></script>
 <script type="text/javascript" src="http://www.kcsfoundation.org/inc/js/jscript.js"></script>
-
 
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -106,8 +99,13 @@ $(".bgTopPurpose a.titulli").animate({top: "80px"},650).animate({top: "0px"},650
           <a href="http://www.facebook.com/KCSFoundation" target="_blank" class="fb"></a>
         </div>
         <div id="topnav">
-            
-          <ul><li><a href="{{config.WEB_PATH}}/?page=1,2">P&euml;r ne</a></li><li><a href="{{config.WEB_PATH}}/?page=1,33">Programet</a></li><li><a href="{{config.WEB_PATH}}/?page=1,89">Bursat</a></li><li><a href="{{config.WEB_PATH}}/?page=1,9">Donator&euml;t</a></li><li><a href="{{config.WEB_PATH}}/?page=1,165">Medie</a></li></ul>        
+          <ul>
+            <li><a href="{{config.WEB_PATH}}/?page=1,2">P&euml;r ne</a></li>
+            <li><a href="{{config.WEB_PATH}}/?page=1,33">Programet</a></li>
+            <li><a href="{{config.WEB_PATH}}/?page=1,165">Medie</a></li>
+            <li><a href="{{config.WEB_PATH}}/?page=1,89">Bursat</a></li>
+            <li><a href="{{config.WEB_PATH}}/?page=1,9">Donator&euml;t</a></li>
+          </ul>    
         </div>
         
       

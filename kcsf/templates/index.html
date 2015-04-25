@@ -3,8 +3,11 @@
   <script src="http://code.highcharts.com/highcharts.js"></script>
   <script src="http://code.highcharts.com/modules/exporting.js"></script>
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script src="{{ url_for('static', filename='utils.js') }}"></script>
+
+<link href="{{ url_for('static', filename='jquery-ui-1.11.4/jquery-ui.min.css') }}" rel="stylesheet" media="All">
   <style type="text/css">
-      #button {
+    #button {
       width: 12em;
       border-right: 1px solid #222222;
       padding: 0 0 1em 0;
@@ -47,52 +50,49 @@
       background-color: #2586d7;
       color: #fff;
     }
+
+    #question-list{
+      color: #FFF;
+      line-height: 2em;
+      padding: 0;
+      margin: 0;
+      overflow: scroll;
+      overflow-x: hidden;
+      height: 240px;
+    }
+
+    #question-list li{
+      padding: 0 0 0 5px;
+      color: #fff;
+    }
+    #question-list li:hover{
+      color: #fff;
+      background-color: #2586d7;
+      text-decoration: underline;
+    }
+
+    .label-class{
+      font-family: 'Trebuchet MS', 'Lucida Grande', Verdana, Arial, sans-serif;
+      background-color: #222222;
+      color: #FFF;
+      margin: 3px 0 0 0;
+    }
+
+    .ui-button:hover{
+          border-color:#157BB6;
+    }
+    .ui-widget-header, .ui-state-default, .ui-button{
+          background:#157BB6;
+          border: 1px solid #157BB6;
+          color: #FFFFFF;
+          font-weight: bold;
+       }
   </style>
   <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
   <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
       var data;
-      
-      function getImgData(chartContainer) {
-        var chartArea = chartContainer.getElementsByTagName('svg')[0].parentNode;
-        var svg = chartArea.innerHTML;
-        var doc = chartContainer.ownerDocument;
-        var canvas = doc.createElement('canvas');
-        canvas.setAttribute('width', chartArea.offsetWidth);
-        canvas.setAttribute('height', chartArea.offsetHeight);
-        
-        
-        canvas.setAttribute(
-            'style',
-            'position: absolute; ' +
-            'top: ' + (-chartArea.offsetHeight * 2) + 'px;' +
-            'left: ' + (-chartArea.offsetWidth * 2) + 'px;');
-        doc.body.appendChild(canvas);
-        canvg(canvas, svg);
-        var imgData = canvas.toDataURL("image/png");
-        canvas.parentNode.removeChild(canvas);
-        return imgData;
-      }
-      
-      function saveAsImg(chartContainer) {
-        var imgData = getImgData(chartContainer);
-        
-        // Replacing the mime-type will force the browser to trigger a download
-        // rather than displaying the image in the browser window.
-        window.location = imgData.replace("image/png", "image/octet-stream");
-      }
-      
-      function toImg(chartContainer, imgContainer) { 
-        var doc = chartContainer.ownerDocument;
-        var img = doc.createElement('img');
-        img.src = getImgData(chartContainer);
-        
-        while (imgContainer.firstChild) {
-          imgContainer.removeChild(imgContainer.firstChild);
-        }
-        imgContainer.appendChild(img);
-      }
       /*
       function drawPieChart(){
       var group_by = $('#group-select').val();
@@ -219,30 +219,94 @@
         });
       }
   */
+
+
       $(document).ready(function(){
-          drawChart();
+        for (var i in questions){
+          var li = "<li data-value='"+ i +"'>" + questions[i]['questionInList'] + "</li>";
+          $("#questions").append(li);
+          //<li><a href="/user/messages"><span class="tab">Message Center</span></a></li>
+        }
+        console.log(questions[0]);
+        $( "#question-list li" ).draggable({
+          appendTo: "body",
+          helper: "clone"
+        });
+
+        $( "#cart ol" ).droppable({
+          activeClass: "ui-state-default",
+          hoverClass: "ui-state-hover",
+          accept: ":not(.ui-sortable-helper)",
+          drop: function( event, ui ) {
+            $('#cart ol').empty();
+            $( this ).find( ".placeholder" ).remove();
+            $( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
+            $('.data-values').attr('data-value', ui.draggable.attr('data-value'))
+          }
+        });
+
+        $(document).on('dblclick', '#questions li', function() {
+          $('#cart ol').empty();
+          $('#cart ol').find( ".placeholder" ).remove();
+          var question_id = $(this).attr('data-value');
+          var question_text = $(this).text();
+          var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
+          $("#cart ol").append(li_rebuild);
+        });
+
+        $('#btn_filter').click(function(){
+            var question_value = $('#droppable-items li').attr('data-value');
+            drawChart(question_value);
+        })
+        drawChart('municipality');
+        //drawPieChart();
+        
+
+        $('#export-type-select').change(function() {
+            var exportTo = $('#export-type-select').val();
+            $("#popup-confirm").empty();
+            var exportToFullText = "Exportoni në: " + exportTo;
+            $("#popup-confirm").text("A jeni të sigurtë që dëshironi të exportoni në " + exportTo);
+            $('#popup-confirm').dialog({
+                title: exportToFullText,
+                resizable: false,
+                closeOnEscape: true,
+                width: 350,
+                hide: "slide",
+                show : "slide",
+                draggable: false,
+                buttons: {
+                    "Yes": function() {
+                        alert('action taken');
+                        $(this).dialog("close");
+                    },
+                    No: function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+        });
+
+        $('#chart-type-select').change(function(){
+          var question_value = $('#droppable-items li').attr('data-value');
+          if (question_value != undefined){
+            drawChart(question_value);
+          } else {
+            drawChart('municipality');
+          }
           //drawPieChart();
+        })
 
-          $('#group-select').change(function(){
-            drawChart();
-            //drawPieChart();
-          })
-
-          $('#chart-type-select').change(function(){
-            drawChart();
-            //drawPieChart();
-          })
-
-          $("button.export").click(function() {
-              var csvContent = "data:text/csv;charset=utf-8,";
-              var csvContent = csvContent + ConvertToCSV(data);
-              var encodedCsvUri = encodeURI(csvContent);
-              $('#container').highcharts()
-                .exportChart({
-                    scale: $(this).data().scale
-                });
-              window.open(encodedCsvUri);
-          });
+        $("button.export").click(function() {
+            var csvContent = "data:text/csv;charset=utf-8,";
+            var csvContent = csvContent + ConvertToCSV(data);
+            var encodedCsvUri = encodeURI(csvContent);
+            $('#container').highcharts()
+              .exportChart({
+                  scale: $(this).data().scale
+              });
+            window.open(encodedCsvUri);
+        });
       });
 
       function ConvertToCSV(objArray) {
@@ -260,34 +324,45 @@
             }
             return str;
         }
-    function drawChart(){
-      var group_by = $('#group-select').val();
-      var chart_type = $('#chart-type-select').val();
-        url = "/api/data/" + group_by;
-        $.get(url, function(results){ 
-          var dataTable = new google.visualization.DataTable()
-          dataTable.addColumn('string', 'Type');
-          dataTable.addColumn('number', 'Count');
 
-          for(var idx in results){
-            var type = results[idx]['type'];
-            var sum = results[idx]['count'];
-            type = type.toString();
-            dataTable.addRow([type, sum]);
-          }
+        function drawChart(question){
+            var chart_type = $('#chart-type-select').val();
+            url = "/api/data/" + question;
+            $.get(url, function(results){ 
+              var dataTable = new google.visualization.DataTable();
+              dataTable.addColumn('string', 'Type', 'Type');
+              dataTable.addColumn('number', 'Totali', 'Totali');
+              dataTable.addColumn({type: 'number', role: 'annotation'});
 
-          var options = {
-            title: "Pie Chart for municipality count"
-          };
+              for(var idx in results){
+                var type = results[idx]['type'];
+                var sum = results[idx]['count'];
+                type = type.toString();
+                dataTable.addRow([type, sum, sum]);
+              }
 
-          if (chart_type == "pie"){
-            var chart = new google.visualization.PieChart(document.getElementById("piechart"));
-          } else {
-            var chart = new google.visualization.ColumnChart(document.getElementById("piechart"));
-          }
-          chart.draw(dataTable, options);
-        })
-      };
+              var options = {
+                title: getTitleOfChart(question),
+                displayAnnotations: true
+              };
+
+              if (chart_type == "pie"){
+                var chart = new google.visualization.PieChart(document.getElementById("piechart"));
+              } else if(chart_type == "column") {
+                var chart = new google.visualization.ColumnChart(document.getElementById("piechart"));
+              } else if(chart_type == "line") {
+                var chart = new google.visualization.LineChart(document.getElementById("piechart"));
+              } 
+
+              google.visualization.events.addListener(chart, 'ready', function () {
+                var imgUri = chart.getImageURI();
+                $('#link1').click(function () {
+                    window.open(imgUri, 'grafikoni','width=700,height=350');
+                });  
+              });
+              chart.draw(dataTable, options);
+            })
+        };
     </script>
 <div id="index-container" style="width:1080px; margin:-20px 50px 0 -50px; padding-top:100px; height:100%">
   <div class="row col-md-13" style="border-top-left-radius: 5px;">
@@ -296,45 +371,70 @@
         <div id="button" style="width:100%">
         <br><br>
           <ul>
-            <li><a>Home</a></li>
-            <li><a>
-              <select id="group-select" class="form-control">
-                  <option value="municipality" selected="selected">Municipality</option>
-                  <option value="type">Type</option>
-                  <option value="q33">Question 33</option>
-                  <option value="fondacion">Fondacion</option>
-                  <option value="year">Year</option>
-                  <option value="registration-form">Forma e Regjistrimit</option>
-                  <option value="organi-vendimmarres">Organi Vendimmarres</option>
-                  <option value="isRegistered">Is Registered</option>
-              </select>
-            </a></li>
-            <br>
-            <li><button style="margin-left: 70px;" id="btn_filter" class="btn btn-primary">Filter</button><br></li>
-
+          <li><a>Pyetjet</a><br></li>
+            <li>
+              <div id="question-list">
+                <ol id="questions">
+                </ol>
+              </div>
+              <br>
+            </li>
+            <li></li>
+            <li>
+              <div id="cart">
+                <h5 class="ui-widget-header" style="color:#fff;"><a>Kutia e pyetjeve</a></h5>
+                <div class="ui-widget-content" style="border-radius:5px; padding:15px; 0 0 10px; height:80px; width: 100%; background-color:#fff;">
+                  <ol id="droppable-items" class="list-group">
+                    <li class="placeholder">Vendoseni këtu pyetjen !</li>
+                  </ol>
+                </div>
+             </div>
+              <br><br>
+            </li>
+            <li><button style="margin-left: 70px;" id="btn_filter" class="btn btn-primary">Filtroni</button><br></li>
           </ul>
         </div>
       </div>
     </div>
-    <div class="col-md-9" style="background-color:#FFF; height:1250px">
-      <div id="top-menu" style="height:50px; width:832px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
-                  <select id="chart-type-select">
-                    <option value="pie" selected="selected">Pie Chart</option>
-                    <option value="column">Column Chart</option>
+    <div class="col-md-9" style="background-color:#FFF; height:650px">
+      <div id="top-menu" class="list-inline" style="height:50px; width:832px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
+        <div id="select-container">
+              <form class="form-inline">
+                <div class="form-group" style="margin:5px 0 0 10px; float: left;">
+                    <label class="label-class">Tipi i Grafit: &nbsp</label>
+                </div>
+                <div class="form-group">
+                  <select id="chart-type-select" class="form-control" style="width:130px;">
+                      <option value="pie" selected="selected">Pie Chart</option>
+                      <option value="column">Column Chart</option>
+                      <option value="line">Line Chart</option>
                   </select>
+                </div>
+              </form>
+          </div>
+          <div id="select-container-export" style="margin: -34px 10px 0 0; float:right;">
+              <form class="form-inline">
+                <div class="form-group">
+                    <label class="label-class">Exportoni në: &nbsp</label>
+                </div>
+                <div class="form-group">
+                  <select id="export-type-select" style="" class="form-control">
+                      <option value="CSV" selected="selected">CSV</option>
+                      <option value="Excel">Excel</option>
+                      <option value="PDF">PDF</option>
+                  </select>
+                </div>
+              </form>
+          </div>
       </div>
       <div id="chart-container-div" style="height:100%; width:100%;">
-        {#<div id="chart-container" style="width:100%; height:550px;"></div>#}
-        <div id="img_div" style="position: fixed; top: 0; right: 0; z-index: 10; border: 1px solid #b9b9b9">
-          Image will be placed here
-        </div>
         <div id="piechart" style="width:100%; height:550px;"></div>
-        
-        <button onclick="saveAsImg(document.getElementById('piechart'));">Save as PNG Image</button>
-        <button onclick="toImg(document.getElementById('pie_div'), document.getElementById('img_div'));">Convert to image</button>
-
+        <a id="link1" href="" class="col-xs-offset-4 btn btn-primary" style="width: 145px">Shkarko grafikonin</a>
       </div>
     </div>
   </div>
+  <div id="popup-confirm">
+  </div>
+    <hr style="width:100%; color:black;">
 </div>
 {% endblock %}
