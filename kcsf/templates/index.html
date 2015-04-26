@@ -92,142 +92,15 @@
   <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
-      var data;
-      /*
-      function drawPieChart(){
-      var group_by = $('#group-select').val();
-      var url = "api/data/" + group_by;
-      var chart_type1 = $('#chart-type-select').val();
-      var point_format = '';
-      var type1 = "";
-      var tooltip = {}
-      var legend1 = {}
-      if (chart_type1 == "pie"){
-        type1 = "pie";
-        point_format = '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
-        tooltip = { 
-                  pie: {
-                      allowPointSelect: true,
-                      cursor: 'pointer',
-                      dataLabels: {
-                        enabled: true,
-                        formatter: function() {
-                            return Math.round(this.percentage*100)/100 + '%';
-                        },
-                        distance: 40,
-                        color: 'black'
-                      },
-                      showInLegend: true
-                  }
-            }
-
-        if (group_by == "type" || group_by == "organi-vendimmarres"){
-          legend1 = {
-              align: 'right',
-              verticalAlign: 'top',
-              width: 250,
-              y: 50,
-              layout: 'vertical',
-              itemStyle: {
-                  fontSize: "11px",
-                  color: '#000000'
-              }
-            }
-        } else {
-          legend1 = {
-              align: 'right',
-              verticalAlign: 'top',
-              y: 50,
-              layout: 'vertical',
-              itemStyle: {
-                  fontSize: "13px",
-                  color: '#000000'
-              }
-            }
-          }
-      } else {
-        type1 = "column"
-        point_format = '{series.name}: <b>{point.y} </b>';
-        tooltip = {
-                    column: {
-                      pointPadding: 0,
-                      format: '<b>{point.name}</b>: ({point.percentage:.1f} %)',
-                      borderWidth: 0
-                    },
-                    dataLabels: {
-                        enabled: true,
-                        formatter: function() {
-                            return Math.round(this.percentage*100)/100 + '%';
-                        },
-                        distance: 40,
-                        color: 'black'
-                      },
-              } 
-        legend1 = {
-                align: 'right',
-                verticalAlign: 'top',
-                y: 50,
-                layout: 'vertical',
-                itemStyle: {
-                    fontSize: "10px",
-                    color: '#000000'
-                }
-            }
-      }
-      $.get(url, function(jsonResult){
-          data = [];
-          var categoriesArray = []
-          $.each(jsonResult, function(idx, itm){
-              data[idx] = [itm['type'], itm['count']];
-              categoriesArray.push(itm['type']);
-          });
-          var xAxis1;
-          if (chart_type1 == "column"){
-            xAxis1 = {
-                  categories: categoriesArray,
-                  crosshair: false
-              }
-          } else {
-            xAxis1 = {}
-          }
-
-          $('#chart-container').highcharts({
-              chart: {
-                  plotBackgroundColor: null,
-                  plotBorderWidth: null,
-                  plotShadow: false
-              },
-              legend: legend1,
-              title: {
-                  text: ''
-              },
-              tooltip: {
-                  pointFormat: point_format
-              },
-              plotOptions: tooltip,
-              title: {
-                  text: 'Distribution',
-                  x: -20 //center
-              },
-              xAxis: xAxis1,
-              series: [{
-                  type: type1,
-                  name: 'Distribution',
-                  data: data
-              }]
-            });
-        });
-      }
-  */
-
+      var dataTable = null;
 
       $(document).ready(function(){
         for (var i in questions){
-          var li = "<li data-value='"+ i +"'>" + questions[i]['questionInList'] + "</li>";
+          var li = "<li data-value='" + i + "'>" + questions[i]['questionInList'] + "</li>";
           $("#questions").append(li);
-          //<li><a href="/user/messages"><span class="tab">Message Center</span></a></li>
         }
-        console.log(questions[0]);
+        
+
         $( "#question-list li" ).draggable({
           appendTo: "body",
           helper: "clone"
@@ -241,7 +114,7 @@
             $('#cart ol').empty();
             $( this ).find( ".placeholder" ).remove();
             $( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
-            $('.data-values').attr('data-value', ui.draggable.attr('data-value'))
+            $('.data-values').attr('data-value', ui.draggable.attr('data-value'));
           }
         });
 
@@ -252,6 +125,11 @@
           var question_text = $(this).text();
           var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
           $("#cart ol").append(li_rebuild);
+
+          var too_large_questions = ['q84', 'q85', 'q94'];
+          if ($.inArray(question_id, too_large_questions) >= 0){
+            $('#cart-box').css('height', '100px');
+          }
         });
 
         $('#btn_filter').click(function(){
@@ -261,30 +139,21 @@
         drawChart('municipality');
         //drawPieChart();
         
+        $( "#download-excel" ).click(function(){
+          var q_id = $("#droppable-items li").attr('data-value');
+          var dateTime = new Date();
+          var url = "{{url_for('exports.export_reports')}}"+"?questionID=" + q_id + "&questionTitle=" + getTitleOfChart(q_id);
+          var downloadAttr = "Reports (As of '" + dateTime + "').xls";
+          $('#download-excel').prop('href', url);
+          $('#download-excel').prop('download', downloadAttr);
+        });
 
-        $('#export-type-select').change(function() {
-            var exportTo = $('#export-type-select').val();
-            $("#popup-confirm").empty();
-            var exportToFullText = "Exportoni në: " + exportTo;
-            $("#popup-confirm").text("A jeni të sigurtë që dëshironi të exportoni në " + exportTo);
-            $('#popup-confirm').dialog({
-                title: exportToFullText,
-                resizable: false,
-                closeOnEscape: true,
-                width: 350,
-                hide: "slide",
-                show : "slide",
-                draggable: false,
-                buttons: {
-                    "Yes": function() {
-                        alert('action taken');
-                        $(this).dialog("close");
-                    },
-                    No: function() {
-                        $(this).dialog("close");
-                    }
-                }
-            });
+        $( "#download-csv" ).click(function(){
+          var csvContent = "data:text/csv;charset=utf-8,";
+          dataTable.removeColumn(2);
+          var csvContent = csvContent + google.visualization.dataTableToCsv(dataTable);
+          var encodedCsvUri = encodeURI(csvContent);
+          window.open(encodedCsvUri);
         });
 
         $('#chart-type-select').change(function(){
@@ -295,41 +164,14 @@
             drawChart('municipality');
           }
           //drawPieChart();
-        })
-
-        $("button.export").click(function() {
-            var csvContent = "data:text/csv;charset=utf-8,";
-            var csvContent = csvContent + ConvertToCSV(data);
-            var encodedCsvUri = encodeURI(csvContent);
-            $('#container').highcharts()
-              .exportChart({
-                  scale: $(this).data().scale
-              });
-            window.open(encodedCsvUri);
         });
       });
 
-      function ConvertToCSV(objArray) {
-            var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-            var str = '';
-
-            for (var i = 0; i < array.length; i++) {
-                var line = '';
-                for (var index in array[i]) {
-                    if (line != '') line += ','
-
-                    line += array[i][index];
-                }
-                str += line + '\r\n';
-            }
-            return str;
-        }
-
         function drawChart(question){
             var chart_type = $('#chart-type-select').val();
-            url = "/api/data/" + question;
+            url = "{{config.BASE_PATH}}/api/data/" + question;
             $.get(url, function(results){ 
-              var dataTable = new google.visualization.DataTable();
+              dataTable = new google.visualization.DataTable();
               dataTable.addColumn('string', 'Type', 'Type');
               dataTable.addColumn('number', 'Totali', 'Totali');
               dataTable.addColumn({type: 'number', role: 'annotation'});
@@ -356,8 +198,9 @@
 
               google.visualization.events.addListener(chart, 'ready', function () {
                 var imgUri = chart.getImageURI();
-                $('#link1').click(function () {
+                $('#link1').click(function (event) {
                     window.open(imgUri, 'grafikoni','width=700,height=350');
+                    event.preventDefault();
                 });  
               });
               chart.draw(dataTable, options);
@@ -383,7 +226,7 @@
             <li>
               <div id="cart">
                 <h5 class="ui-widget-header" style="color:#fff;"><a>Kutia e pyetjeve</a></h5>
-                <div class="ui-widget-content" style="border-radius:5px; padding:15px; 0 0 10px; height:80px; width: 100%; background-color:#fff;">
+                <div id="cart-box" class="ui-widget-content" style="border-radius:5px; padding:15px; 0 0 10px; height:80px; width: 100%; background-color:#fff;">
                   <ol id="droppable-items" class="list-group">
                     <li class="placeholder">Vendoseni këtu pyetjen !</li>
                   </ol>
@@ -418,17 +261,14 @@
                     <label class="label-class">Exportoni në: &nbsp</label>
                 </div>
                 <div class="form-group">
-                  <select id="export-type-select" style="" class="form-control">
-                      <option value="CSV" selected="selected">CSV</option>
-                      <option value="Excel">Excel</option>
-                      <option value="PDF">PDF</option>
-                  </select>
+                  <a id="download-excel" style="" class="btn btn-sm btn-success">Excel</a>
+                  <a id="download-csv" style="" class="btn btn-sm btn-success">CSV</a>
                 </div>
               </form>
           </div>
       </div>
       <div id="chart-container-div" style="height:100%; width:100%;">
-        <div id="piechart" style="width:100%; height:550px;"></div>
+        <div id="piechart" style="width:800px; height:550px;"></div>
         <a id="link1" href="" class="col-xs-offset-4 btn btn-primary" style="width: 145px">Shkarko grafikonin</a>
       </div>
     </div>

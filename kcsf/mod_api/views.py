@@ -8,8 +8,54 @@ mod_api = Blueprint('api', __name__, url_prefix='/api')
 
 @mod_api.route('/data/<string:tipi>', methods=['GET'])
 def route(tipi):
+    json_response = aggregation(tipi)
+    # pergjigjen e kthyer dhe te konvertuar ne JSON ne baze te json_util.dumps() e ruajme ne  resp
+    resp = Response(
+            response=json_util.dumps(json_response['result']),
+            mimetype='application/json')
+
+    return resp
+
+
+@mod_api.route('/large-questions/<string:question>', methods=['GET'])
+def route1(question):
+    group = "organisation.%s.answer" % question
+    result_json = {}
+    for i in range(1, 5):
+        a = "a" + str(i)
+        rezultati = mongo.db.ikshc.aggregate([
+            {
+                "$group": {
+                   "_id": {
+                        "type": "$%s.%s.text" % (group, a)
+                    },
+                    "avg": {
+                        "$avg": "$%s.%s.value" % (group, a)
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "type": "$_id.type",
+                    "avg": "$avg"
+                }
+            }
+        ])
+
+        result_json[a] = rezultati['result'][0]
+
+        # pergjigjen e kthyer dhe te konvertuar ne JSON ne baze te json_util.dumps() e ruajme ne  resp
+        resp = Response(
+                response=json_util.dumps(result_json),
+                mimetype='application/json')
+
+    return resp
+
+
+def aggregation(tipi):
     questions_array = []
-    for i in range(1, 98):
+    for i in range(1, 99):
         questions_array.append("q" + str(i))
 
     group_variable = ""
@@ -17,7 +63,6 @@ def route(tipi):
         "q44", "q3", "q5", "q8", "q36", "q38", "q58",
         "q21", "q91", "q15", "q16", "q10", "q12", "q88",
         "q64", "q68", "q61", "q63", "q55", "q57", "q59"]
-
     unwind = {}
     match = {}
     group = {}
@@ -117,56 +162,4 @@ def route(tipi):
             }
             aggregation = [unwind, match, group, project, sort]
             rezultati = mongo.db.ikshc.aggregate(aggregation)
-    #question_to_group = "$organisation."
-    '''
-    unwind = {
-        "$unwind": tipi
-    }
-
-    group = {}
-    project = {}
-    aggregation = []
-    '''
-
-    # pergjigjen e kthyer dhe te konvertuar ne JSON ne baze te json_util.dumps() e ruajme ne  resp
-    resp = Response(
-            response=json_util.dumps(rezultati['result']),
-            mimetype='application/json')
-
-    return resp
-
-
-@mod_api.route('/datas/<string:question>', methods=['GET'])
-def route1(question):
-    group = "organisation.q7.answer"
-    result_json = {}
-    for i in range(1, 5):
-        a = "a" + str(i)
-        rezultati = mongo.db.ikshc.aggregate([
-            {
-                "$group": {
-                   "_id": {
-                        "type%d" % i: "$%s.%s.text" % (group, a)
-                    },
-                    "count": {
-                        "$avg": "$%s.%s.value" % (group, a)
-                    }
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "type%d" % i: "$_id.type%d" % i,
-                    "count": "$count"
-                }
-            }
-        ])
-
-        result_json[a] = rezultati['result'][0]
-
-        # pergjigjen e kthyer dhe te konvertuar ne JSON ne baze te json_util.dumps() e ruajme ne  resp
-        resp = Response(
-                response=json_util.dumps(result_json),
-                mimetype='application/json')
-
-    return resp
+    return rezultati

@@ -20,10 +20,12 @@ def create_app():
 
     #Import blueprint modules
     from mod_api.views import mod_api
+    from mod_exports.views import mod_exports
     from mod_visualisation.views import mod_visualisation
 
     app.register_blueprint(mod_api)
     app.register_blueprint(mod_visualisation)
+    app.register_blueprint(mod_exports)
 
     #Initialize the app to work with MongoDB
     mongo.init_app(app, config_prefix='MONGO')
@@ -47,6 +49,8 @@ def load_config(app):
 
     app.config['SERVER_PORT'] = config.get('Application', 'SERVER_PORT')
     app.config['WEB_PATH'] = config.get('Application', 'WEB_PATH')
+    app.config['BASE_PATH'] = config.get('Application', 'BASE_PATH')
+    app.config['EXCEL_DOC_DIR'] = config.get('Application', 'EXCEL_DOC_DIR')
     app.config['MONGO_DBNAME'] = config.get('Mongo', 'DB_NAME')
 
     # Logging path might be relative or starts from the root.

@@ -44,7 +44,7 @@ questions = {
         "questionOnTitle" : "Sa auditime të jashtme financiare i keni pasur gjatë 3 viteve të fundit?"
     },
     "q7" : {
-        "questionInList": "Përqindja e femrave në organizatë",
+        "questionInList": "Përqindja mesatare e femrave në organizatë",
         "questionOnTitle" : "Përqindja e femrave në organizatë"
     },
     "q8" : {
@@ -52,7 +52,7 @@ questions = {
         "questionOnTitle" : "Si e informoni stafin tuaj të ri rreth të drejtave dhe obligimeve të tyre?"
     },
     "q9" : {
-        "questionInList": "A ka organizata juaj:",
+        "questionInList": "A kanë organizatat:",
         "answer" : {
             "a1" : "Kodin e mirësjelljes të personelit?",
             "a3" : "Rregulloren financiare?",
@@ -176,12 +176,12 @@ questions = {
         "questionOnTitle" : "Gjatë 3 viteve të fundit, a keni pasur vizita në zyren tuaj nga inspektorë të Administratës Tatimore të Kosovës?"
     },
     "q38" : {
-        "questionInList" : "Vizitat nga Administrata Tatimore të Kosovës",
+        "questionInList" : "Kërkesat e inspektorëve të ATK-së në vizitat e organizatave",
         "questionOnTitle" : "Gjatë vizitave të tyre, inspektorët e Administratës Tatimore të Kosovës kanë kërkuar nga ju:"
     },
     "q39" : {
-        "questionInList": "Kërkesat nga Administrata Tatimore të Kosovës",
-        "questionOnTitle" : "Gjatë vizitave të tyre, inspektorët e Administratës Tatimore të Kosovës kanë kërkuar nga ju?"
+        "questionInList": "Përqindjet e burimeve financiare të organizatave ",
+        "questionOnTitle" : "Bazuar në vitin e kaluar financiar, çfarë përqindje e burimeve financiare të organizatës suaj kanë ardhur prej burimeve në vijim?"
     },
     "q40" : {
         "questionInList" : "Numri i donatorëve në 3 vitet e fundit",
@@ -360,64 +360,64 @@ questions = {
         "questionOnTitle" : "Çfarë ndikimi mendoni që ka shoqëria civile në përgjithësi në hartimin e politikave publike ose ligjeve në Kosovë?"
     },
     "q84" : {
-        "answer" : "Angazhimi i organizatave në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale në 3 vite",
-        "question" : "Në 3 vitet e fundit, a është angazhuar organizata e juaj në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale?"
+        "questionInList" : "Angazhimi i organizatave në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale në 3 vite",
+        "questionOnTitle" : "Në 3 vitet e fundit, a është angazhuar organizata e juaj në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale?"
     },
     "q85" : {
-        "answer" : "Fushat e angazhimit të organizatave në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale",
-        "question" : "Nëse Po, në cilat fusha është angazhuar organizata e juaj në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale?"
+        "questionInList" : "Fushat e angazhimit të organizatave në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale",
+        "questionOnTitle" : "Nëse Po, në cilat fusha është angazhuar organizata e juaj në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale?"
     },
     "q86" : {
-        "answer" : "Rezultati i angazhimit të organizatave në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale",
-        "question" : "Në përgjithësi, cili ka qenë rezultati i angazhimit tuaj për këto politika/ligje?"
+        "questionInList" : "Rezultati i angazhimit të organizatave në hartimin dhe miratimin e ndonjë politike publike, ligji apo rregullore komunale",
+        "questionOnTitle" : "Në përgjithësi, cili ka qenë rezultati i angazhimit tuaj për këto politika/ligje?"
     },
     "q87" : {
-        "answer" : "Pranimi i arsyeve me shkrim për refuzim të kontributit të organizatave",
-        "question" : "Në rastet kur kontributet tuaja janë refuzuar, a keni pranuar ndonjëherë me shkrim arsyet e refuzimit?"
+        "questionInList" : "Pranimi i arsyeve me shkrim për refuzim të kontributit të organizatave",
+        "questionOnTitle" : "Në rastet kur kontributet tuaja janë refuzuar, a keni pranuar ndonjëherë me shkrim arsyet e refuzimit?"
     },
     "q88" : {
-        "answer" : "Monitorimi i punës së institucioneve publike ose zbatimit të politikave/ligjeve nga organizatat",
-        "question" : "Si e monitoron organizata juaj punën e institucioneve publike relevante ose zbatimin e politikave/ligjeve relevante për punën e organizatës suaj?"
+        "questionInList" : "Monitorimi i punës së institucioneve publike ose zbatimit të politikave/ligjeve nga organizatat",
+        "questionOnTitle" : "Si e monitoron organizata juaj punën e institucioneve publike relevante ose zbatimin e politikave/ligjeve relevante për punën e organizatës suaj?"
     },
     "q89" : {
-        "answer" : "Komunikimi i organizatave me institucionet publike",
-        "question" : "Sa shpesh keni komunikim (shkëmbim informatash, takime, aktivitete të përbashkëta) me institucionet publike relevante për punën tuaj:"
+        "questionInList" : "Komunikimi i organizatave me institucionet publike",
+        "questionOnTitle" : "Sa shpesh keni komunikim (shkëmbim informatash, takime, aktivitete të përbashkëta) me institucionet publike relevante për punën tuaj:"
     },
     "q90" : {
-        "answer" : "Organizatat që ofrojnë shërbime për qytetarët",
-        "question" : "A ofron organizata juaj shërbime për qytetarët ose grupet e caktuara të qytetarëve?"
+        "questionInList" : "Organizatat që ofrojnë shërbime për qytetarët",
+        "questionOnTitle" : "A ofron organizata juaj shërbime për qytetarët ose grupet e caktuara të qytetarëve?"
     },
     "q91" : {
-        "answer" : "Lloji i shërbimeve të ofruara për qytetarët nga organizatat",
-        "question" : "Çfarë lloj shërbimesh ofron organizata juaj?"
+        "questionInList" : "Lloji i shërbimeve të ofruara për qytetarët nga organizatat",
+        "questionOnTitle" : "Çfarë lloj shërbimesh ofron organizata juaj?"
     },
     "q92" : {
-        "answer" : "Mënyra e ofrimit të shërbimeve nga organizatat",
-        "question" : "Organizata juaj shërbimet i ofron:"
+        "questionInList" : "Mënyra e ofrimit të shërbimeve nga organizatat",
+        "questionOnTitle" : "Organizata juaj shërbimet i ofron:"
     },
     "q93" : {
-        "answer" : "Burimet e financimit për shërbimet e organizatave",
-        "question" : "Shpenzimet për ofrimin e shërbimeve organizata juaj i mbulon nga:"
+        "questionInList" : "Burimet e financimit për shërbimet e organizatave",
+        "questionOnTitle" : "Shpenzimet për ofrimin e shërbimeve organizata juaj i mbulon nga:"
     },
     "q94" : {
-        "answer" : "Vlerësimi i ambientit të përgjithshëm shoqëror, politik dhe ekonomik në Kosovë në raport me zhvillimin e shoqërisë civile",
-        "question" : "Sipas mendimit tuaj, ambienti i përgjithshëm shoqëror, politik dhe ekonomik në Kosovë:"
+        "questionInList" : "Vlerësimi i ambientit të përgjithshëm shoqëror, politik dhe ekonomik në Kosovë në raport me zhvillimin e shoqërisë civile",
+        "questionOnTitle" : "Sipas mendimit tuaj, ambienti i përgjithshëm shoqëror, politik dhe ekonomik në Kosovë:"
     },
     "q95" : {
-        "answer" : "Pengesat kryesore për zhvillimin e shoqërisë civile në Kosovë",
-        "question" : "Sipas mendimit tuaj, cila është pengesa më e madhe në zhvillimin e shoqërisë civile në Kosovë (nga faktorët jashtë shoqërisë civile):"
+        "questionInList" : "Pengesat kryesore për zhvillimin e shoqërisë civile në Kosovë",
+        "questionOnTitle" : "Sipas mendimit tuaj, cila është pengesa më e madhe në zhvillimin e shoqërisë civile në Kosovë (nga faktorët jashtë shoqërisë civile):"
     },
     "q96" : {
-        "answer" : "Imazhi i shoqërisë civile në publikun e gjerë",
-        "question" : "Sipas mendimit tuaj, cili është imazhi i shoqërisë civile në publikun e gjerë:"
+        "questionInList" : "Imazhi i shoqërisë civile në publikun e gjerë",
+        "questionOnTitle" : "Sipas mendimit tuaj, cili është imazhi i shoqërisë civile në publikun e gjerë:"
     },
     "q97" : {
-        "answer" : "Puna dhe ndikimi i organizatave të shoqërisë civile në përgjithësi, nga publiku i gjerë",
-        "question" : "Puna dhe ndikimi i organizatave të shoqërisë civile në përgjithësi, nga publiku i gjerë:"
+        "questionInList" : "Puna dhe ndikimi i organizatave të shoqërisë civile në përgjithësi, nga publiku i gjerë",
+        "questionOnTitle" : "Puna dhe ndikimi i organizatave të shoqërisë civile në përgjithësi, nga publiku i gjerë:"
     },
     "q98" : {
-        "answer" : "Puna e organizatave të shoqërisë civile në përgjithësi, brenda rrethanave aktuale socio-kulturore nga publiku:",
-        "question" : "Puna e organizatave të shoqërisë civile në përgjithësi, brenda rrethanave aktuale socio-kulturore nga publiku:"
+        "questionInList" : "Puna e organizatave të shoqërisë civile në përgjithësi, brenda rrethanave aktuale socio-kulturore nga publiku:",
+        "questionOnTitle" : "Puna e organizatave të shoqërisë civile në përgjithësi, brenda rrethanave aktuale socio-kulturore nga publiku:"
     }
 }
 
@@ -1059,6 +1059,8 @@ questions = {
             "question" : "Çfarë lloji të përkrahjes keni pranuar nga donatorët gjatë 3 viteve të fundit:"
         }
 */
+
+var questions_with_many_answers = ["q52", "q50", "q67", "q17", "q28", "q39", "q9", "q7"];
 
 function getTitleOfChart(q_nr){
     var array = [];
