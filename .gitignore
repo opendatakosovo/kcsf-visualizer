@@ -1,10 +1,15 @@
+venv
+*.xlsx
+config.cfg
+.cfg~
+.html~
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 
 # C extensions
 *.so
-config.cfg
 # Distribution / packaging
 .Python
 venv/
