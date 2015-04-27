@@ -198,7 +198,7 @@
                 draggable: false,
                 position: {
                   my: "right+65",
-                  at: "top+165",
+                  at: "top+168",
                   of: $('#raporte-te-gatshme')
                 }
             });
@@ -225,7 +225,6 @@
               dataTable.addColumn('string', 'Type', 'Type');
               dataTable.addColumn('number', 'Totali', 'Totali');
               dataTable.addColumn({type: 'number', role: 'annotation'});
-
               for(var idx in results){
                 var type = results[idx]['type'];
                 var sum = results[idx]['count'];
@@ -240,9 +239,9 @@
               
 
               var options = {
-                  title: getTitleOfChart(question),
-                  displayAnnotations: true
-                };
+                title: getTitleOfChart(question),
+                displayAnnotations: true
+              };
 
               if (chart_type == "pie"){
                 var chart = new google.visualization.PieChart(document.getElementById("piechart"));
