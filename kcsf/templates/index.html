@@ -88,19 +88,18 @@
           font-weight: bold;
        }
   </style>
-  <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/rgbcolor.js"></script> 
-  <script type="text/javascript" src="http://canvg.googlecode.com/svn/trunk/canvg.js"></script>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
       var dataTable = null;
 
       $(document).ready(function(){
         for (var i in questions){
-          var li = "<li data-value='" + i + "'>" + questions[i]['questionInList'] + "</li>";
-          $("#questions").append(li);
+           if ($.inArray(i, questions_with_many_answers) == -1){
+            var li = "<li data-value='" + i + "'>" + getQuestionInList(i) + "</li>";
+            $("#questions").append(li);
+          }
         }
         
-
         $( "#question-list li" ).draggable({
           appendTo: "body",
           helper: "clone"
@@ -125,11 +124,6 @@
           var question_text = $(this).text();
           var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
           $("#cart ol").append(li_rebuild);
-
-          var too_large_questions = ['q84', 'q85', 'q94'];
-          if ($.inArray(question_id, too_large_questions) >= 0){
-            $('#cart-box').css('height', '100px');
-          }
         });
 
         $('#btn_filter').click(function(){
@@ -170,6 +164,7 @@
         function drawChart(question){
             var chart_type = $('#chart-type-select').val();
             url = "{{config.BASE_PATH}}/api/data/" + question;
+            console.log(url);
             $.get(url, function(results){ 
               dataTable = new google.visualization.DataTable();
               dataTable.addColumn('string', 'Type', 'Type');
@@ -183,10 +178,16 @@
                 dataTable.addRow([type, sum, sum]);
               }
 
+              var formatter = new google.visualization.NumberFormat({
+                  fractionDigits: 2,
+                  suffix: '%'
+              });
+              
+
               var options = {
-                title: getTitleOfChart(question),
-                displayAnnotations: true
-              };
+                  title: getTitleOfChart(question),
+                  displayAnnotations: true
+                };
 
               if (chart_type == "pie"){
                 var chart = new google.visualization.PieChart(document.getElementById("piechart"));
@@ -199,8 +200,9 @@
               google.visualization.events.addListener(chart, 'ready', function () {
                 var imgUri = chart.getImageURI();
                 $('#link1').click(function (event) {
-                    window.open(imgUri, 'grafikoni','width=700,height=350');
-                    event.preventDefault();
+                    $('#link1').prop('download', 'Chart.png');
+                    $('#link1').prop('href', imgUri);
+                    console.log(imgUri);
                 });  
               });
               chart.draw(dataTable, options);
@@ -226,7 +228,7 @@
             <li>
               <div id="cart">
                 <h5 class="ui-widget-header" style="color:#fff;"><a>Kutia e pyetjeve</a></h5>
-                <div id="cart-box" class="ui-widget-content" style="border-radius:5px; padding:15px; 0 0 10px; height:80px; width: 100%; background-color:#fff;">
+                <div id="cart-box" class="ui-widget-content" style="border-radius:5px; padding:15px 10px 0 10px; height:100px; width: 100%; background-color:#fff;">
                   <ol id="droppable-items" class="list-group">
                     <li class="placeholder">Vendoseni këtu pyetjen !</li>
                   </ol>

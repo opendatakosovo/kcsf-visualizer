@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import Response
-from bson import json_util
+from bson import json_util, SON
 from kcsf import mongo
 
 mod_api = Blueprint('api', __name__, url_prefix='/api')
@@ -9,7 +9,6 @@ mod_api = Blueprint('api', __name__, url_prefix='/api')
 @mod_api.route('/data/<string:tipi>', methods=['GET'])
 def route(tipi):
     json_response = aggregation(tipi)
-    # pergjigjen e kthyer dhe te konvertuar ne JSON ne baze te json_util.dumps() e ruajme ne  resp
     resp = Response(
             response=json_util.dumps(json_response['result']),
             mimetype='application/json')
@@ -26,10 +25,10 @@ def route1(question):
         rezultati = mongo.db.ikshc.aggregate([
             {
                 "$group": {
-                   "_id": {
+                    "_id": {
                         "type": "$%s.%s.text" % (group, a)
                     },
-                    "avg": {
+                    "count": {
                         "$avg": "$%s.%s.value" % (group, a)
                     }
                 }
@@ -38,14 +37,63 @@ def route1(question):
                 "$project": {
                     "_id": 0,
                     "type": "$_id.type",
-                    "avg": "$avg"
+                    "count": "$count"
                 }
             }
         ])
 
         result_json[a] = rezultati['result'][0]
 
-        # pergjigjen e kthyer dhe te konvertuar ne JSON ne baze te json_util.dumps() e ruajme ne  resp
+        resp = Response(
+                response=json_util.dumps(result_json),
+                mimetype='application/json')
+
+    return resp
+
+
+@mod_api.route('/q9/<string:operator>', methods=['GET'])
+def q9(operator):
+    group = "organisation.q9.answer"
+    result_json = {}
+    for i in range(1, 7):
+        a = "a" + str(i)
+        rezultati = mongo.db.ikshc.aggregate([
+            {
+                "$match": {
+                    "%s.%s.value" % (group, a): {
+                        "$nin": [operator, ""]
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "type": "$%s.%s.text" % (group, a),
+                        "vlera": "$%s.%s.value" % (group, a)
+                    },
+                    "count": {
+                        "$sum": 1
+                    }
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "vlera": "$_id.vlera",
+                    "type": "$_id.type",
+                    "count": "$count"
+                }
+            },
+            {
+                '$sort':
+                    SON([
+                        ('type', 1),
+                        ('vlera', 1)])
+            }
+        ])
+
+        result_json[a] = rezultati['result'][0]
+
         resp = Response(
                 response=json_util.dumps(result_json),
                 mimetype='application/json')
@@ -102,7 +150,7 @@ def aggregation(tipi):
 
         group = {
             "$group": {
-               "_id": {
+                "_id": {
                     "type": "$" + group_variable
                 },
                 "count": {
@@ -112,7 +160,6 @@ def aggregation(tipi):
         }
 
         aggregation = [match, group, project, sort]
-        rezultati = mongo.db.ikshc.aggregate(aggregation)
     else:
         if tipi not in questions_with_array_answers:
             group_variable = "organisation.%s.answer" % tipi
@@ -127,7 +174,7 @@ def aggregation(tipi):
 
             group = {
                 "$group": {
-                   "_id": {
+                    "_id": {
                         "type": "$" + group_variable
                     },
                     "count": {
@@ -136,7 +183,6 @@ def aggregation(tipi):
                 }
             }
             aggregation = [match, group, project, sort]
-            rezultati = mongo.db.ikshc.aggregate(aggregation)
         else:
             group_variable = "organisation.%s.answer" % tipi
             unwind = {
@@ -152,7 +198,7 @@ def aggregation(tipi):
 
             group = {
                 "$group": {
-                   "_id": {
+                    "_id": {
                         "type": "$" + group_variable
                     },
                     "count": {
@@ -161,5 +207,6 @@ def aggregation(tipi):
                 }
             }
             aggregation = [unwind, match, group, project, sort]
-            rezultati = mongo.db.ikshc.aggregate(aggregation)
+
+    rezultati = mongo.db.ikshc.aggregate(aggregation)
     return rezultati
