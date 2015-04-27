@@ -1,7 +1,7 @@
 [Application]
 SERVER_PORT = 5050
 BASE_PATH = 
-WEB_PATH = http://www.kcsfoundation.org
+WEB_PATH =
 EXCEL_DOC_DIR = 
 
 [Mongo]
