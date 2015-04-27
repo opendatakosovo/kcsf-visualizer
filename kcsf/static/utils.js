@@ -224,8 +224,8 @@ questions = {
         "questionOnTitle" : "Si do ta vlerësonit qasjen e organizatave të shoqërisë civile në sigurimin e fondeve nga donatorët:"
     },
     "q50" : {
-        "questionInList" : "Ndikimi e donatorëve në punën e organizatave",
-        "questionOnTitle" : "Si do ta vlerësonit qasjen e organizatave të shoqërisë civile në sigurimin e fondeve nga donatorët:"
+        "questionInList" : "A keni pasur raste kur donatori ju ka kërkuar që:",
+        "questionOnTitle" : "A keni pasur raste kur donatori ju ka kërkuar që:"
     },
     "q51" : {
         "questionInList" : "Oranizatat e ftuara për konsultim rreth programimit të fondeve",
@@ -435,6 +435,7 @@ function getTitleOfChart(q_nr){
     }
 }
 
+raporte_te_gatshme_array = ["q29", "q22", "q45", "q47", "q71", "q11", "q49", "q40", "q54", "q43", "q66", "q14"]
 
 function getQuestionInList(q_nr){
     return questions[q_nr]['questionInList'];

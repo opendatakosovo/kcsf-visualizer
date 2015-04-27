@@ -87,6 +87,28 @@
           color: #FFFFFF;
           font-weight: bold;
        }
+
+    #raporte-te-gatshme{
+      color:#000;
+      text-decoration: none;
+    }
+    #raporte-te-gatshme:hover{
+      color: #157BB6;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    #popup-confirm{
+      padding: 5px 0 0 10px;
+    }
+
+    #popup-confirm li{
+      padding: 5px 0 0 0;
+    }
+
+    #popup-confirm li:hover{
+      cursor: pointer;
+      color: #157BB6;
+    }
   </style>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
@@ -99,7 +121,7 @@
             $("#questions").append(li);
           }
         }
-        
+
         $( "#question-list li" ).draggable({
           appendTo: "body",
           helper: "clone"
@@ -159,12 +181,45 @@
           }
           //drawPieChart();
         });
+        $('#raporte-te-gatshme').click(function(){
+          for (var i=0; i<raporte_te_gatshme_array.length; i++){
+            var raporti_gatshem = raporte_te_gatshme_array[i];
+            var li = "<li data-value='" + raporti_gatshem + "'>" + getQuestionInList(raporti_gatshem) + "</li>";
+            $("#raporte-te-gatshme-list").append(li);
+          }
+          $('#popup-confirm').dialog({
+                title: "Raportet e gatshme",
+                resizable: false,
+                closeOnEscape: true,
+                width: 300,
+                height: 300,
+                hide: "slide",
+                show : "slide",
+                draggable: false,
+                position: {
+                  my: "right+65",
+                  at: "top+165",
+                  of: $('#raporte-te-gatshme')
+                }
+            });
+
+
+          $('#popup-confirm li').click(function(){
+            $('#cart ol').empty();
+            $('#cart ol').find( ".placeholder" ).remove();
+            var question_id = $(this).attr('data-value');
+            var question_text = $(this).text();
+            var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
+            $("#cart ol").append(li_rebuild);
+            drawChart(question_id);
+            $('#popup-confirm').dialog('close');
+          });
+        })
       });
 
         function drawChart(question){
             var chart_type = $('#chart-type-select').val();
             url = "{{config.BASE_PATH}}/api/data/" + question;
-            console.log(url);
             $.get(url, function(results){ 
               dataTable = new google.visualization.DataTable();
               dataTable.addColumn('string', 'Type', 'Type');
@@ -202,7 +257,6 @@
                 $('#link1').click(function (event) {
                     $('#link1').prop('download', 'Chart.png');
                     $('#link1').prop('href', imgUri);
-                    console.log(imgUri);
                 });  
               });
               chart.draw(dataTable, options);
@@ -211,7 +265,7 @@
     </script>
 <div id="index-container" style="width:1080px; margin:-20px 50px 0 -50px; padding-top:100px; height:100%">
   <div class="row col-md-13" style="border-top-left-radius: 5px;">
-    <div class="col-md-3" style="background-color: #222222; height:650px">
+    <div class="col-md-3" style="background-color: #222222; height:680px">
       <div id="filter" style="height: 650px;">
         <div id="button" style="width:100%">
         <br><br>
@@ -241,7 +295,7 @@
         </div>
       </div>
     </div>
-    <div class="col-md-9" style="background-color:#FFF; height:650px">
+    <div class="col-md-9" style="background-color:#FFF; height:680px">
       <div id="top-menu" class="list-inline" style="height:50px; width:832px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
         <div id="select-container">
               <form class="form-inline">
@@ -270,12 +324,16 @@
           </div>
       </div>
       <div id="chart-container-div" style="height:100%; width:100%;">
+        <a id="raporte-te-gatshme" style="float:right;">Raporte të gatshme</a>
+        <div id="popup-confirm">
+          <ol id="raporte-te-gatshme-list">
+          </ol>
+        </div>
+        <br>
         <div id="piechart" style="width:800px; height:550px;"></div>
         <a id="link1" href="" class="col-xs-offset-4 btn btn-primary" style="width: 145px">Shkarko grafikonin</a>
       </div>
     </div>
-  </div>
-  <div id="popup-confirm">
   </div>
     <hr style="width:100%; color:black;">
 </div>
