@@ -219,7 +219,7 @@
 
         function drawChart(question){
             var chart_type = $('#chart-type-select').val();
-            url = "{{config.BASE_PATH}}/api/data/" + question;
+            url = "{{url_for('api.route')}}" + "?questionID=" + question;
             $.get(url, function(results){ 
               dataTable = new google.visualization.DataTable();
               dataTable.addColumn('string', 'Type', 'Type');

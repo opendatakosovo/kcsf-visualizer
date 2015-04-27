@@ -1,13 +1,15 @@
 from flask import Blueprint
-from flask import Response
+from flask import Response, request
 from bson import json_util, SON
 from kcsf import mongo
 
 mod_api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@mod_api.route('/data/<string:tipi>', methods=['GET'])
-def route(tipi):
+@mod_api.route('/data', methods=['GET'])
+def route():
+    if(len(request.args) > 0):
+        tipi = request.args.get('questionID')
     json_response = aggregation(tipi)
     resp = Response(
             response=json_util.dumps(json_response['result']),
