@@ -1,3 +1,4 @@
+app.wsgi
 venv
 *.xlsx
 config.cfg
