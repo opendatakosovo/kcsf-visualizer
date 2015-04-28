@@ -109,6 +109,15 @@
       cursor: pointer;
       color: #157BB6;
     }
+hr.style17 { 
+  border: 0; 
+  height: 1px; 
+  background-image: -webkit-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+  background-image: -moz-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+  background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+  background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0); 
+}
+
   </style>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
@@ -163,8 +172,8 @@
             });
 
             for (var i = 0; i < div_array_Ids.length; i++){
-              var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-primary' style='width: 145px'>Shkarko grafikonin</a>"
-              var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"</div>";
+              var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
+              var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
               $('#charts').append(div);
               if(question_values_array_Ids[i] != undefined){
                 drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i]);
@@ -251,8 +260,8 @@
             $("#cart ol").append(li_rebuild);
             $('#popup-confirm').dialog('close');
             $('#charts').empty();
-            var a = "<a id='link1' class='col-xs-offset-4 btn btn-primary' style='width: 145px'>Shkarko grafikonin</a>"
-            var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a +"<br><br><br><br><br><br><br><br><br></div>";
+            var a = "<a id='link1' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
+            var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a +"<br><br><br><br><br><br><br><br><br>/div>";
             $('#charts').append(div);
             drawChart("chart_display0", question_id, "link1");
           });
@@ -379,7 +388,7 @@
         <div id="charts">
           <div id="chart">
             <div id="piechart" style="width:800px; height:400px;"></div>
-            <a id="link1" href="" class="col-xs-offset-4 btn btn-primary" style="width: 145px">Shkarko grafikonin</a>
+            <a id="link1" href="" class="col-xs-offset-4 btn btn-success" style="width: 145px">Shkarko grafikonin</a>
             <br><br><br><br><br><br><br><br><br>
           </div>
         </div>
