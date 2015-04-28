@@ -132,7 +132,6 @@
           hoverClass: "ui-state-hover",
           accept: ":not(.ui-sortable-helper)",
           drop: function( event, ui ) {
-            $('#cart ol').empty();
             $( this ).find( ".placeholder" ).remove();
             $( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
             $('.data-values').attr('data-value', ui.draggable.attr('data-value'));
@@ -140,7 +139,6 @@
         });
 
         $(document).on('dblclick', '#questions li', function() {
-          $('#cart ol').empty();
           $('#cart ol').find( ".placeholder" ).remove();
           var question_id = $(this).attr('data-value');
           var question_text = $(this).text();
@@ -149,12 +147,36 @@
         });
 
         $('#btn_filter').click(function(){
-            var question_value = $('#droppable-items li').attr('data-value');
-            drawChart(question_value);
+            $('#charts').empty();
+            var div_array_Ids = [];
+            var download_button_array_Ids = [];
+            var question_values_array_Ids = [];
+            $( "#droppable-items li" ).each(function( index ) {
+              var vlera = $(this).attr('data-value');
+              question_values_array_Ids.push(vlera);
+              var containerID = "chart_display" + index;
+              var downloadLink = "link" + index;
+              div_array_Ids.push(containerID);
+              download_button_array_Ids.push(downloadLink);
+            });
+
+            for (var i = 0; i < div_array_Ids.length; i++){
+              var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-primary' style='width: 145px'>Shkarko grafikonin</a>"
+              var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"</div>";
+              $('#charts').append(div);
+              if(question_values_array_Ids[i] != undefined){
+                drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i]);
+              }
+            }
         })
-        drawChart('municipality');
+        drawChart("piechart", 'municipality');
         //drawPieChart();
         
+        $('#btn_clear_questionbox').click(function(){
+          $('#cart ol').empty();
+          $('#cart ol').append('<li class="placeholder">Vendoseni këtu pyetjen !</li>')
+        });
+
         $( "#download-excel" ).click(function(){
           var q_id = $("#droppable-items li").attr('data-value');
           var dateTime = new Date();
@@ -173,12 +195,21 @@
         });
 
         $('#chart-type-select').change(function(){
-          var question_value = $('#droppable-items li').attr('data-value');
-          if (question_value != undefined){
-            drawChart(question_value);
-          } else {
-            drawChart('municipality');
-          }
+            var div_array_Ids = [];
+            var download_button_array_Ids = [];
+            var question_values_array_Ids = [];
+            $( "#droppable-items li" ).each(function( index ) {
+              var vlera = $(this).attr('data-value');
+              question_values_array_Ids.push(vlera);
+              var containerID = "chart_display" + index;
+              var downloadLink = "link" + index;
+              div_array_Ids.push(containerID);
+              download_button_array_Ids.push(downloadLink);
+            });
+
+            for (var i = 0; i < div_array_Ids.length; i++){
+              drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i]);
+            }
           //drawPieChart();
         });
         $('#raporte-te-gatshme').click(function(){
@@ -211,13 +242,20 @@
             var question_text = $(this).text();
             var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
             $("#cart ol").append(li_rebuild);
-            drawChart(question_id);
             $('#popup-confirm').dialog('close');
+            $('#charts').empty();
+            var a = "<a id='link1' class='col-xs-offset-4 btn btn-primary' style='width: 145px'>Shkarko grafikonin</a>"
+            var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a +"<br><br><br><br><br><br><br><br><br></div>";
+            $('#charts').append(div);
+            drawChart("chart_display0", question_id, "link1");
           });
         })
       });
 
-        function drawChart(question){
+      
+      $('#left-menu').css('height', $('#visualization-content').height()+'px');
+
+        function drawChart(containerID, question, downloadLInk){
             var chart_type = $('#chart-type-select').val();
             url = "{{url_for('api.route')}}" + "?questionID=" + question;
             $.get(url, function(results){ 
@@ -244,27 +282,27 @@
               };
 
               if (chart_type == "pie"){
-                var chart = new google.visualization.PieChart(document.getElementById("piechart"));
+                var chart = new google.visualization.PieChart(document.getElementById(containerID));
               } else if(chart_type == "column") {
-                var chart = new google.visualization.ColumnChart(document.getElementById("piechart"));
+                var chart = new google.visualization.ColumnChart(document.getElementById(containerID));
               } else if(chart_type == "line") {
-                var chart = new google.visualization.LineChart(document.getElementById("piechart"));
+                var chart = new google.visualization.LineChart(document.getElementById(containerID));
               } 
 
               google.visualization.events.addListener(chart, 'ready', function () {
                 var imgUri = chart.getImageURI();
-                $('#link1').click(function (event) {
-                    $('#link1').prop('download', 'Chart.png');
-                    $('#link1').prop('href', imgUri);
+                $("#" + downloadLInk).click(function (event) {
+                    $('#' + downloadLInk).prop('download', 'Chart.png');
+                    $('#' + downloadLInk).prop('href', imgUri);
                 });  
               });
               chart.draw(dataTable, options);
             })
         };
     </script>
-<div id="index-container" style="width:1080px; margin:-20px 50px 0 -50px; padding-top:100px; height:100%">
+<div id="index-container" style="width:1080px; margin:-20px 50px 0 -50px; padding-top:100px; height:100%;">
   <div class="row col-md-13" style="border-top-left-radius: 5px;">
-    <div class="col-md-3" style="background-color: #222222; height:680px">
+    <div id="left-menu" class="col-md-3" style="background-color: #222222; overflow:auto;">
       <div id="filter" style="height: 650px;">
         <div id="button" style="width:100%">
         <br><br>
@@ -280,21 +318,23 @@
             <li></li>
             <li>
               <div id="cart">
-                <h5 class="ui-widget-header" style="color:#fff;"><a>Kutia e pyetjeve</a></h5>
-                <div id="cart-box" class="ui-widget-content" style="border-radius:5px; padding:15px 10px 0 10px; height:100px; width: 100%; background-color:#fff;">
-                  <ol id="droppable-items" class="list-group">
+                <h5 class="ui-widget-header" style="background-color: #FFF; color:#fff;"><a>Kutia e pyetjeve</a></h5>
+                <div id="cart-box" style="padding:15px 10px 0 10px; height:150px; width: 100%; background-color:#fff; overflow: scroll;">
+                  <ol id="droppable-items">
                     <li class="placeholder">Vendoseni këtu pyetjen !</li>
                   </ol>
                 </div>
              </div>
               <br><br>
             </li>
-            <li><button style="margin-left: 70px;" id="btn_filter" class="btn btn-primary">Filtroni</button><br></li>
+            <li>
+              <button style="margin-left: 50px;" id="btn_filter" class="btn btn-primary">Filtroni</button>
+              <button style="" id="btn_clear_questionbox" class="btn btn-primary">Clear</button><br>
           </ul>
         </div>
       </div>
     </div>
-    <div class="col-md-9" style="background-color:#FFF; height:680px">
+    <div class="col-md-9" id="visualization-content" style="background-color:#FFF; overflow:hidden;">
       <div id="top-menu" class="list-inline" style="height:50px; width:832px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
         <div id="select-container">
               <form class="form-inline">
@@ -329,8 +369,13 @@
           </ol>
         </div>
         <br>
-        <div id="piechart" style="width:800px; height:550px;"></div>
-        <a id="link1" href="" class="col-xs-offset-4 btn btn-primary" style="width: 145px">Shkarko grafikonin</a>
+        <div id="charts">
+          <div id="chart">
+            <div id="piechart" style="width:800px; height:400px;"></div>
+            <a id="link1" href="" class="col-xs-offset-4 btn btn-primary" style="width: 145px">Shkarko grafikonin</a>
+            <br><br><br><br><br><br><br><br><br>
+          </div>
+        </div>
       </div>
     </div>
   </div>
