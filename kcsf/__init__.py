@@ -49,7 +49,6 @@ def load_config(app):
 
     app.config['SERVER_PORT'] = config.get('Application', 'SERVER_PORT')
     app.config['WEB_PATH'] = config.get('Application', 'WEB_PATH')
-    app.config['BASE_PATH'] = config.get('Application', 'BASE_PATH')
     app.config['EXCEL_DOC_DIR'] = config.get('Application', 'EXCEL_DOC_DIR')
     app.config['MONGO_DBNAME'] = config.get('Mongo', 'DB_NAME')
 

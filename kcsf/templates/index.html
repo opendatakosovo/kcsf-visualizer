@@ -219,6 +219,7 @@
           //drawPieChart();
         });
         $('#raporte-te-gatshme').click(function(){
+          $('#raporte-te-gatshme-list').empty();
           for (var i=0; i<raporte_te_gatshme_array.length; i++){
             var raporti_gatshem = raporte_te_gatshme_array[i];
             var li = "<li data-value='" + raporti_gatshem + "'>" + getQuestionInList(raporti_gatshem) + "</li>";
