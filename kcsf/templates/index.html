@@ -133,8 +133,10 @@
           accept: ":not(.ui-sortable-helper)",
           drop: function( event, ui ) {
             $( this ).find( ".placeholder" ).remove();
-            $( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
-            $('.data-values').attr('data-value', ui.draggable.attr('data-value'));
+            var append = "<li data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
+            $(this).append(append);
+            //$( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
+            //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
           }
         });
 
@@ -174,7 +176,7 @@
         
         $('#btn_clear_questionbox').click(function(){
           $('#cart ol').empty();
-          $('#cart ol').append('<li class="placeholder">Vendoseni këtu pyetjen !</li>')
+          $('#cart ol').append('<li class="placeholder">Vendoseni këtu pyetjen !</li>');
         });
 
         $( "#download-excel" ).click(function(){
@@ -319,7 +321,7 @@
             <li>
               <div id="cart">
                 <h5 class="ui-widget-header" style="background-color: #FFF; color:#fff;"><a>Kutia e pyetjeve</a></h5>
-                <div id="cart-box" style="padding:15px 10px 0 10px; height:150px; width: 100%; background-color:#fff; overflow: scroll;">
+                <div id="cart-box" style="padding:15px 10px 0 10px; height:150px; width: 100%; background-color:#fff; overflow: scroll; overflow-x: hidden;">
                   <ol id="droppable-items">
                     <li class="placeholder">Vendoseni këtu pyetjen !</li>
                   </ol>
