@@ -27,15 +27,12 @@
     #button li {
       border-bottom: 1px solid #90bade;
       margin: 0;
-      list-style: none;
       list-style-image: none;
     }
       
     #button li a {
       display: block;
-      padding: 5px 5px 5px 0.5em;
-      border-left: 10px solid #222222;
-      border-right: 10px solid #222222;
+      padding: 0 5px 5px 0.5em;
       background-color: #222222;
       color: #fff;
       text-decoration: none;
@@ -58,7 +55,7 @@
       margin: 0;
       overflow: scroll;
       overflow-x: hidden;
-      height: 240px;
+      height: 280px;
     }
 
     #question-list li{
@@ -66,6 +63,7 @@
       color: #fff;
     }
     #question-list li:hover{
+      cursor: pointer;
       color: #fff;
       background-color: #2586d7;
       text-decoration: underline;
@@ -126,15 +124,58 @@ hr.style17 {
       $(document).ready(function(){
         for (var i in questions){
            if ($.inArray(i, questions_with_many_answers) == -1){
-            var li = "<li data-value='" + i + "'>" + getQuestionInList(i) + "</li>";
+            var li_answers_build = "";
+            for (var j=0; j<questions[i]['answers'].length; j++){
+              var li_answers = "<li id='" + i + "' class='cbp-spmenu-vertical-item-child' style='display: none; margin-left:15px;' data-value='" + i + ".answer." + questions[i]['answers'][j] + "'>" + questions[i]['answers'][j] + "</li>"
+              li_answers_build = li_answers_build + li_answers
+            }
+            var li = "<li id='" + i + "' class='cbp-spmenu-vertical-item-parent' data-value='" + i + "'>" + getQuestionInList(i) + "" + li_answers_build + "</li>";
             $("#questions").append(li);
           }
         }
+
+        $( ".cbp-spmenu-vertical-item-parent" ).click(function() {
+          var elemId = $(this).attr('id');
+
+          if(elemId == "dates"){
+            elemId = $('.chart-type:checked').val() + "-" + elemId;
+          }
+
+          if ( $( ".cbp-spmenu-vertical-item-child#" + elemId ).is( ":hidden" ) ) {
+            $( ".cbp-spmenu-vertical-item-child#" + elemId ).slideDown( "fast", function() {
+              // Animation complete.
+            });
+            $( ".cbp-spmenu-vertical-item-parent#" + elemId ).css( "background-color", "#2586d7")
+          }else{
+            $( ".cbp-spmenu-vertical-item-child#" + elemId ).slideUp( "fast", function() {
+                // Animation complete.
+            });
+            $( ".cbp-spmenu-vertical-item-parent#" + elemId ).css( "background-color", "")
+          }
+        });
+
+        $( "#question-list li" ).click(function(){
+          var id = $(this).attr('data-value');
+          $('question-list li ul').css('display', "block");
+        });
 
         $( "#question-list li" ).draggable({
           appendTo: "body",
           helper: "clone"
         });
+
+        $('#droppable-items-match').droppable({
+          activeClass: "ui-state-default",
+          hoverClass: "ui-state-hover",
+          accept: ":not(.ui-sortable-helper)",
+          drop: function( event, ui ) {
+            $( this ).find( ".placeholder" ).remove();
+            var append = "<li data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
+            $(this).append(append);
+            //$( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
+            //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
+          }
+        })
 
         $( "#cart ol" ).droppable({
           activeClass: "ui-state-default",
@@ -149,12 +190,20 @@ hr.style17 {
           }
         });
 
-        $(document).on('dblclick', '#questions li', function() {
+        $(document).on('dblclick', '.cbp-spmenu-vertical-item-parent', function() {
           $('#cart ol').find( ".placeholder" ).remove();
           var question_id = $(this).attr('data-value');
           var question_text = $(this).text();
           var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
           $("#cart ol").append(li_rebuild);
+        });
+
+        $(document).on('dblclick', '.cbp-spmenu-vertical-item-child', function() {
+          $('#droppable-items-match').find( ".placeholder" ).remove();
+          var question_id = $(this).attr('data-value');
+          var question_text = $(this).text();
+          var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
+          $("#droppable-items-match").append(li_rebuild);
         });
 
         $('#btn_filter').click(function(){
@@ -170,7 +219,8 @@ hr.style17 {
               div_array_Ids.push(containerID);
               download_button_array_Ids.push(downloadLink);
             });
-
+            //console.log( $( "#droppable-items-match li" ).attr('data-value'));
+            console.log( $( "#droppable-items li" ).attr('data-value'));
             for (var i = 0; i < div_array_Ids.length; i++){
               var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
               var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
@@ -184,6 +234,8 @@ hr.style17 {
         //drawPieChart();
         
         $('#btn_clear_questionbox').click(function(){
+          $( "#droppable-items-match" ).empty();
+          $( "#droppable-items-match" ).append('<li class="placeholder">Vendoseni këtu kriterin per filtrim !</li>');
           $('#cart ol').empty();
           $('#cart ol').append('<li class="placeholder">Vendoseni këtu pyetjen !</li>');
         });
@@ -268,8 +320,6 @@ hr.style17 {
         })
       });
 
-      
-      $('#left-menu').css('height', $('#visualization-content').height()+'px');
 
         function drawChart(containerID, question, downloadLInk){
             var chart_type = $('#chart-type-select').val();
@@ -316,14 +366,14 @@ hr.style17 {
             })
         };
     </script>
-<div id="index-container" style="width:1080px; margin:-20px 50px 0 -50px; padding-top:100px; height:100%;">
-  <div class="row col-md-13" style="border-top-left-radius: 5px;">
-    <div id="left-menu" class="col-md-3" style="background-color: #222222; overflow:auto;">
+<div id="index-container" style="width:1180px; margin:-20px 100px 0 -100px; padding-top:100px; height:100%;">
+  <div class="row col-md-13" style="border-top-left-radius: 5px; height: 700px;">
+    <div id="left-menu" class="col-md-3" style="background-color: #222222; height: 100%;">
       <div id="filter" style="height: 650px;">
         <div id="button" style="width:100%">
         <br><br>
-          <ul>
-          <li><a>Pyetjet</a><br></li>
+          <ul style="margin-top: -25px;">
+          <b style="color: #fff;">Pyetjet</b><br><br>
             <li>
               <div id="question-list">
                 <ol id="questions">
@@ -331,27 +381,36 @@ hr.style17 {
               </div>
               <br>
             </li>
-            <li></li>
             <li>
-              <div id="cart">
-                <h5 class="ui-widget-header" style="background-color: #FFF; color:#fff;"><a>Kutia e pyetjeve</a></h5>
-                <div id="cart-box" style="padding:15px 10px 0 10px; height:150px; width: 100%; background-color:#fff; overflow: scroll; overflow-x: hidden;">
-                  <ol id="droppable-items">
+              <div id="match">
+                 <h5 style="background-color: #222222; color:#fff;">Kutia e filtrimit</h5>
+                <div id="cart-box" style="padding:15px 10px 0 10px; height:90px; width: 100%; background-color:#fff; overflow: scroll; overflow-x: hidden;">
+                  <ol id="droppable-items-match">
                     <li class="placeholder">Vendoseni këtu pyetjen !</li>
                   </ol>
                 </div>
              </div>
-              <br><br>
             </li>
             <li>
-              <button style="margin-left: 50px;" id="btn_filter" class="btn btn-primary">Filtroni</button>
-              <button style="" id="btn_clear_questionbox" class="btn btn-primary">Clear</button><br>
+              <div id="cart">
+                <h5 style="background-color: #222222; color:#fff;">Kutia e grupimit</h5>
+                <div id="cart-box" style="padding:15px 10px 0 10px; height:90px; width: 100%; background-color:#fff; overflow: scroll; overflow-x: hidden;">
+                  <ol id="droppable-items">
+                    <li class="placeholder">Vendoseni këtu pyetjen !</li>
+                  </ol>
+                </div>
+                <br>
+             </div>
+            </li>
+            <li>
+              <button style="margin-left: 65px;" id="btn_filter" class="btn btn-primary">Filtroni</button>
+              <button style="" id="btn_clear_questionbox" class="btn btn-primary">Fshini</button><br>
           </ul>
         </div>
       </div>
     </div>
     <div class="col-md-9" id="visualization-content" style="background-color:#FFF; overflow:hidden;">
-      <div id="top-menu" class="list-inline" style="height:50px; width:832px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
+      <div id="top-menu" class="list-inline" style="height:50px; width:906px; padding: 7px 3px 3px 3px; margin: 0 15px 0 -15px; background-color:#222222;">
         <div id="select-container">
               <form class="form-inline">
                 <div class="form-group" style="margin:5px 0 0 10px; float: left;">
