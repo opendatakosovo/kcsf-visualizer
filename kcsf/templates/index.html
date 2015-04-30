@@ -121,12 +121,68 @@ hr.style17 {
     google.load("visualization", "1", {packages:["corechart"]});
       var dataTable = null;
 
+      function drawChart(containerID, question, downloadLInk, url){
+        var chart_type = $('#chart-type-select').val();
+        $.get(url, function(results){
+          dataTable = new google.visualization.DataTable();
+          dataTable.addColumn('string', 'Type', 'Type');
+          dataTable.addColumn('number', 'Totali', 'Totali');
+          dataTable.addColumn({type: 'number', role: 'annotation'});
+          for(var idx in results){
+            var type = results[idx]['type'];
+            var sum = results[idx]['count'];
+            type = type.toString();
+            dataTable.addRow([type, sum, sum]);
+          }
+
+          var formatter = new google.visualization.NumberFormat({
+              fractionDigits: 2,
+              suffix: '%'
+          });
+          
+
+          var options = {
+            title: getTitleOfChart(question),
+            displayAnnotations: true
+          };
+
+          if (chart_type == "pie"){
+            var chart = new google.visualization.PieChart(document.getElementById(containerID));
+          } else if(chart_type == "column") {
+            var chart = new google.visualization.ColumnChart(document.getElementById(containerID));
+          } else if(chart_type == "line") {
+            var chart = new google.visualization.LineChart(document.getElementById(containerID));
+          } 
+
+          google.visualization.events.addListener(chart, 'ready', function () {
+            var imgUri = chart.getImageURI();
+            $("#" + downloadLInk).click(function (event) {
+                $('#' + downloadLInk).prop('download', 'Chart.png');
+                $('#' + downloadLInk).prop('href', imgUri);
+            });  
+          });
+          chart.draw(dataTable, options);
+        })
+      };
+
+      function hasDuplicates(array) {
+            var valuesSoFar = {};
+            for (var i = 0; i < array.length; ++i) {
+                var value = array[i];
+                if (Object.prototype.hasOwnProperty.call(valuesSoFar, value)) {
+                    return true;
+                }
+                valuesSoFar[value] = true;
+            }
+            return false;
+        }
+
       $(document).ready(function(){
         for (var i in questions){
            if ($.inArray(i, questions_with_many_answers) == -1){
             var li_answers_build = "";
             for (var j=0; j<questions[i]['answers'].length; j++){
-              var li_answers = "<li id='" + i + "' class='cbp-spmenu-vertical-item-child' style='display: none; margin-left:15px;' data-value='" + i + ".answer." + questions[i]['answers'][j] + "'>" + questions[i]['answers'][j] + "</li>"
+              var li_answers = "<li id='" + i + "' class='cbp-spmenu-vertical-item-child' style='display: none; margin-left:15px;' data-value='" + questions[i]['answers'][j] + "'>" + questions[i]['answers'][j] + "</li>"
               li_answers_build = li_answers_build + li_answers
             }
             var li = "<li id='" + i + "' class='cbp-spmenu-vertical-item-parent' data-value='" + i + "'>" + getQuestionInList(i) + "" + li_answers_build + "</li>";
@@ -170,7 +226,7 @@ hr.style17 {
           accept: ":not(.ui-sortable-helper)",
           drop: function( event, ui ) {
             $( this ).find( ".placeholder" ).remove();
-            var append = "<li data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
+            var append = "<li id='" + ui.draggable.attr('id') + "' data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
             $(this).append(append);
             //$( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
             //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
@@ -202,35 +258,18 @@ hr.style17 {
           $('#droppable-items-match').find( ".placeholder" ).remove();
           var question_id = $(this).attr('data-value');
           var question_text = $(this).text();
-          var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
+          var li_rebuild = "<li id='" + $(this).attr('id') + "' data-value='"+ question_id +"'>" + question_text + "</li>";
           $("#droppable-items-match").append(li_rebuild);
         });
 
         $('#btn_filter').click(function(){
-            $('#charts').empty();
-            var div_array_Ids = [];
-            var download_button_array_Ids = [];
-            var question_values_array_Ids = [];
-            $( "#droppable-items li" ).each(function( index ) {
-              var vlera = $(this).attr('data-value');
-              question_values_array_Ids.push(vlera);
-              var containerID = "chart_display" + index;
-              var downloadLink = "link" + index;
-              div_array_Ids.push(containerID);
-              download_button_array_Ids.push(downloadLink);
-            });
-            //console.log( $( "#droppable-items-match li" ).attr('data-value'));
-            console.log( $( "#droppable-items li" ).attr('data-value'));
-            for (var i = 0; i < div_array_Ids.length; i++){
-              var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
-              var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
-              $('#charts').append(div);
-              if(question_values_array_Ids[i] != undefined){
-                drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i]);
-              }
-            }
+            drawChartOnClick();
         })
-        drawChart("piechart", 'municipality', 'link1');
+        
+        
+        
+        url = "{{url_for('api.route')}}" + "?questionID=municipality";
+        drawChart("piechart", 'municipality', 'link1', url);
         //drawPieChart();
         
         $('#btn_clear_questionbox').click(function(){
@@ -258,26 +297,7 @@ hr.style17 {
         });
 
         $('#chart-type-select').change(function(){
-            var div_array_Ids = [];
-            var download_button_array_Ids = [];
-            var question_values_array_Ids = [];
-            $( "#droppable-items li" ).each(function( index ) {
-              var vlera = $(this).attr('data-value');
-              question_values_array_Ids.push(vlera);
-              var containerID = "chart_display" + index;
-              var downloadLink = "link" + index;
-              div_array_Ids.push(containerID);
-              download_button_array_Ids.push(downloadLink);
-            });
-
-            for (var i = 0; i < div_array_Ids.length; i++){
-              if (question_values_array_Ids[i] != undefined){
-                drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i]);
-              } else {
-                drawChart("piechart", 'municipality', 'link1');
-              }
-            }
-          //drawPieChart();
+            drawChartOnClick();
         });
         $('#raporte-te-gatshme').click(function(){
           $('#raporte-te-gatshme-list').empty();
@@ -315,56 +335,55 @@ hr.style17 {
             var a = "<a id='link1' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
             var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a +"<br><br><br><br><br><br><br><br><br></div>";
             $('#charts').append(div);
-            drawChart("chart_display0", question_id, "link1");
+            var url = "{{url_for('api.route')}}" + "?questionID=" + question_id;
+            drawChart("chart_display0", question_id, "link1", url);
           });
         })
       });
 
+      function drawChartOnClick(){
+        $('#charts').empty();
+            var div_array_Ids = [];
+            var download_button_array_Ids = [];
+            var question_values_array_Ids = [];
+            var id_array_Ids_match = [];
+            var question_values_array_Ids_match = [];
+            var match_final = {};
 
-        function drawChart(containerID, question, downloadLInk){
-            var chart_type = $('#chart-type-select').val();
-            url = "{{url_for('api.route')}}" + "?questionID=" + question;
-            $.get(url, function(results){ 
-              dataTable = new google.visualization.DataTable();
-              dataTable.addColumn('string', 'Type', 'Type');
-              dataTable.addColumn('number', 'Totali', 'Totali');
-              dataTable.addColumn({type: 'number', role: 'annotation'});
-              for(var idx in results){
-                var type = results[idx]['type'];
-                var sum = results[idx]['count'];
-                type = type.toString();
-                dataTable.addRow([type, sum, sum]);
+            $( "#droppable-items li" ).each(function( index ) {
+              var vlera = $(this).attr('data-value');
+              question_values_array_Ids.push(vlera);
+              var containerID = "chart_display" + index;
+              var downloadLink = "link" + index;
+              div_array_Ids.push(containerID);
+              download_button_array_Ids.push(downloadLink);
+            });
+
+            $( "#droppable-items-match li" ).each(function( index ) {
+              var vlera_match = $(this).attr('data-value');
+              var q_id_match = $(this).attr('id');
+              id_array_Ids_match.push(q_id_match);
+              question_values_array_Ids_match.push(vlera_match);
+
+              match_final[q_id_match + index] = vlera_match;
+            });
+            for (var i = 0; i < div_array_Ids.length; i++){
+              var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
+              var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
+              $('#charts').append(div);
+              if(question_values_array_Ids[i] != undefined){
+                var match_string = JSON.stringify(match_final);
+                var url = "";
+                if (match_string.length > 2){
+                  url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
+                  
+                } else {
+                  url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
+                }
+                drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
               }
-
-              var formatter = new google.visualization.NumberFormat({
-                  fractionDigits: 2,
-                  suffix: '%'
-              });
-              
-
-              var options = {
-                title: getTitleOfChart(question),
-                displayAnnotations: true
-              };
-
-              if (chart_type == "pie"){
-                var chart = new google.visualization.PieChart(document.getElementById(containerID));
-              } else if(chart_type == "column") {
-                var chart = new google.visualization.ColumnChart(document.getElementById(containerID));
-              } else if(chart_type == "line") {
-                var chart = new google.visualization.LineChart(document.getElementById(containerID));
-              } 
-
-              google.visualization.events.addListener(chart, 'ready', function () {
-                var imgUri = chart.getImageURI();
-                $("#" + downloadLInk).click(function (event) {
-                    $('#' + downloadLInk).prop('download', 'Chart.png');
-                    $('#' + downloadLInk).prop('href', imgUri);
-                });  
-              });
-              chart.draw(dataTable, options);
-            })
-        };
+            }
+      }
     </script>
 <div id="index-container" style="width:1180px; margin:-20px 100px 0 -100px; padding-top:100px; height:100%;">
   <div class="row col-md-13" style="border-top-left-radius: 5px; height: 700px;">
@@ -386,7 +405,7 @@ hr.style17 {
                  <h5 style="background-color: #222222; color:#fff;">Kutia e filtrimit</h5>
                 <div id="cart-box" style="padding:15px 10px 0 10px; height:90px; width: 100%; background-color:#fff; overflow: scroll; overflow-x: hidden;">
                   <ol id="droppable-items-match">
-                    <li class="placeholder">Vendoseni këtu pyetjen !</li>
+                    <li class="placeholder">Vendoseni këtu kriterin për filtrim !</li>
                   </ol>
                 </div>
              </div>

@@ -1,7 +1,8 @@
 from flask import Blueprint
 from flask import Response, request
-from bson import json_util, SON
+from bson import json_util
 from kcsf import mongo
+from slugify import slugify
 
 mod_api = Blueprint('api', __name__, url_prefix='/api')
 
@@ -10,103 +11,65 @@ mod_api = Blueprint('api', __name__, url_prefix='/api')
 def route():
     if(len(request.args) > 0):
         tipi = request.args.get('questionID')
-    json_response = aggregation(tipi)
+        data = request.args.get('data')
+
+    if data:
+        json_response = aggregation(tipi, data)
+    else:
+        json_response = aggregation(tipi)
     resp = Response(
-            response=json_util.dumps(json_response['result']),
-            mimetype='application/json')
-
-    return resp
-
-
-@mod_api.route('/large-questions/<string:question>', methods=['GET'])
-def route1(question):
-    group = "organisation.%s.answer" % question
-    result_json = {}
-    for i in range(1, 5):
-        a = "a" + str(i)
-        rezultati = mongo.db.ikshc.aggregate([
-            {
-                "$group": {
-                    "_id": {
-                        "type": "$%s.%s.text" % (group, a)
-                    },
-                    "count": {
-                        "$avg": "$%s.%s.value" % (group, a)
-                    }
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "type": "$_id.type",
-                    "count": "$count"
-                }
-            }
-        ])
-
-        result_json[a] = rezultati['result'][0]
-
-        resp = Response(
-                response=json_util.dumps(result_json),
+                response=json_util.dumps(json_response['result']),
                 mimetype='application/json')
-
     return resp
 
 
-@mod_api.route('/q9/<string:operator>', methods=['GET'])
-def q9(operator):
-    group = "organisation.q9.answer"
-    result_json = {}
-    for i in range(1, 7):
-        a = "a" + str(i)
-        rezultati = mongo.db.ikshc.aggregate([
-            {
-                "$match": {
-                    "%s.%s.value" % (group, a): {
-                        "$nin": [operator, ""]
-                    }
-                }
-            },
-            {
-                "$group": {
-                    "_id": {
-                        "type": "$%s.%s.text" % (group, a),
-                        "vlera": "$%s.%s.value" % (group, a)
-                    },
-                    "count": {
-                        "$sum": 1
-                    }
-                }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                    "vlera": "$_id.vlera",
-                    "type": "$_id.type",
-                    "count": "$count"
-                }
-            },
-            {
-                '$sort':
-                    SON([
-                        ('type', 1),
-                        ('vlera', 1)])
-            }
-        ])
-
-        result_json[a] = rezultati['result'][0]
-
-        resp = Response(
-                response=json_util.dumps(result_json),
-                mimetype='application/json')
-
-    return resp
-
-
-def aggregation(tipi):
+def aggregation(tipi, match_str=None):
+    match_fields = {}
     questions_array = []
     for i in range(1, 99):
         questions_array.append("q" + str(i))
+
+    if match_str:
+        match_in_array = []
+        json_obj = json_util.loads(match_str)
+        for item in json_obj:
+            if item[:-1] == "municipality":
+                match_in_array.append(slugify(json_obj[item]))
+                match_fields["organisation.municipality.slug"] = {
+                    "$in": match_in_array
+                }
+            if item[:-1] == "type":
+                match_in_array.append(json_obj[item])
+                match_fields["organisation.type"] = {
+                    "$in": match_in_array
+                }
+            if item[:-1] == "year":
+                match_in_array.append(json_obj[item])
+                match_fields["organisation.foundingYear"] = {
+                    "$in": match_in_array
+                }
+            if item[:-1] == "isRegistered":
+                match_in_array.append(json_obj[item])
+                match_fields["organisation.registered.isRegistered"] = {
+                    "$in": match_in_array
+                }
+            if item[:-1] == "registration-form":
+                match_in_array.append(json_obj[item])
+                match_fields["organisation.registered.registrationForm"] = {
+                    "$in": match_in_array
+                }
+            if item[:-1] in questions_array:
+                match_in_array.append(json_obj[item])
+                match_fields["organisation.%s.answer" % item[:-1]] = {
+                    "$in": match_in_array
+                }
+    else:
+        match_fields["organisation.municipality.slug"] = {
+            "$nin": [""]
+        }
+        match_fields["organisation.type"] = {
+            "$nin": [""]
+        }
 
     group_variable = ""
     questions_with_array_answers = [
@@ -114,7 +77,6 @@ def aggregation(tipi):
         "q21", "q91", "q15", "q16", "q10", "q12", "q88",
         "q64", "q68", "q61", "q63", "q55", "q57", "q59"]
     unwind = {}
-    match = {}
     group = {}
     sort = {
             "$sort": {
@@ -141,13 +103,11 @@ def aggregation(tipi):
             group_variable = "organisation.foundingYear"
         elif tipi == "registration-form":
             group_variable = "organisation.registered.registrationForm"
-
-        match = {
-            "$match": {
-                group_variable: {
-                    "$ne": ""
-                }
+        match_fields[group_variable] = {
+                "$nin": [""]
             }
+        match = {
+            "$match": match_fields
         }
 
         group = {
@@ -166,12 +126,11 @@ def aggregation(tipi):
         if tipi not in questions_with_array_answers:
             group_variable = "organisation.%s.answer" % tipi
 
-            match = {
-                "$match": {
-                    group_variable: {
-                        "$ne": ""
-                    }
+            match_fields[group_variable] = {
+                    "$nin": [""]
                 }
+            match = {
+                "$match": match_fields
             }
 
             group = {
@@ -190,12 +149,12 @@ def aggregation(tipi):
             unwind = {
                 "$unwind": "$%s" % group_variable
             }
-            match = {
-                "$match": {
-                    group_variable: {
-                        "$ne": ""
-                    }
+
+            match_fields[group_variable] = {
+                    "$nin": [""]
                 }
+            match = {
+                "$match": match_fields
             }
 
             group = {
