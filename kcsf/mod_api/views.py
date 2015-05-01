@@ -44,7 +44,7 @@ def aggregation(tipi, match_str=None):
                     "$in": match_in_array
                 }
             if item[:-1] == "year":
-                match_in_array.append(json_obj[item])
+                match_in_array.append(int(json_obj[item]))
                 match_fields["organisation.foundingYear"] = {
                     "$in": match_in_array
                 }

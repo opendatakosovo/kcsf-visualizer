@@ -227,11 +227,14 @@ hr.style17 {
           drop: function( event, ui ) {
             $( this ).find( ".placeholder" ).remove();
             var append = "<li id='" + ui.draggable.attr('id') + "' data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
-            $(this).append(append);
+            addToList('#droppable-items-match', append, ui.draggable.attr('id'), ui.draggable.attr('data-value'));
+          }
+          
             //$( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
             //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
-          }
-        })
+        });
+
+        
 
         $( "#cart ol" ).droppable({
           activeClass: "ui-state-default",
@@ -240,7 +243,7 @@ hr.style17 {
           drop: function( event, ui ) {
             $( this ).find( ".placeholder" ).remove();
             var append = "<li data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
-            $(this).append(append);
+            addToListNoId("#cart ol", append, ui.draggable.text());
             //$( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
             //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
           }
@@ -251,15 +254,16 @@ hr.style17 {
           var question_id = $(this).attr('data-value');
           var question_text = $(this).text();
           var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
-          $("#cart ol").append(li_rebuild);
+          addToListNoId("#cart ol", li_rebuild, question_text);
         });
 
         $(document).on('dblclick', '.cbp-spmenu-vertical-item-child', function() {
           $('#droppable-items-match').find( ".placeholder" ).remove();
+          var id = $(this).attr('id');
           var question_id = $(this).attr('data-value');
           var question_text = $(this).text();
           var li_rebuild = "<li id='" + $(this).attr('id') + "' data-value='"+ question_id +"'>" + question_text + "</li>";
-          $("#droppable-items-match").append(li_rebuild);
+          addToList('#droppable-items-match', li_rebuild, id, question_id);
         });
 
         $('#btn_filter').click(function(){
@@ -322,7 +326,6 @@ hr.style17 {
                 }
             });
 
-
           $('#popup-confirm li').click(function(){
             $('#cart ol').empty();
             $('#cart ol').find( ".placeholder" ).remove();
@@ -340,6 +343,32 @@ hr.style17 {
           });
         })
       });
+  
+      function addToList(ul, append, id, dataValue) {
+           var addit = true;
+           $(ul+" li").each(function()
+           {
+               if(dataValue == $(this).attr("data-value") && id == $(this).attr("id"))
+               { 
+                  addit = false;
+               }
+           });
+           if(addit)
+               $(ul).append(append);
+         }
+      
+      function addToListNoId(ul, append, text) {
+           var addit = true;
+           $(ul+" li").each(function()
+           {
+               if(text == $(this).text())
+               { 
+                  addit = false;
+               }
+           });
+           if(addit)
+               $(ul).append(append);
+         }
 
       function drawChartOnClick(){
         $('#charts').empty();
@@ -364,7 +393,6 @@ hr.style17 {
               var q_id_match = $(this).attr('id');
               id_array_Ids_match.push(q_id_match);
               question_values_array_Ids_match.push(vlera_match);
-
               match_final[q_id_match + index] = vlera_match;
             });
             for (var i = 0; i < div_array_Ids.length; i++){
