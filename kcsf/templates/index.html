@@ -226,7 +226,7 @@ hr.style17 {
           accept: ":not(.ui-sortable-helper)",
           drop: function( event, ui ) {
             $( this ).find( ".placeholder" ).remove();
-            var append = "<li id='" + ui.draggable.attr('id') + "' data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
+            var append = "<li id='" + ui.draggable.attr('id') + "' data-value='" + ui.draggable.attr('data-value') + "' class='data-values' data-toggle='tooltip' data-placement='bottom' title='"+ getQuestionInList(ui.draggable.attr('id'))+"'>"+ ui.draggable.text() +"</li>";
             addToList('#droppable-items-match', append, ui.draggable.attr('id'), ui.draggable.attr('data-value'));
           }
           
@@ -262,7 +262,7 @@ hr.style17 {
           var id = $(this).attr('id');
           var question_id = $(this).attr('data-value');
           var question_text = $(this).text();
-          var li_rebuild = "<li id='" + $(this).attr('id') + "' data-value='"+ question_id +"'>" + question_text + "</li>";
+          var li_rebuild = "<li id='" + $(this).attr('id') + "' data-value='"+ question_id +"' data-toggle='tooltip' data-placement='bottom' title='"+ getQuestionInList(id)+"'>" + question_text + "</li>";
           addToList('#droppable-items-match', li_rebuild, id, question_id);
         });
 

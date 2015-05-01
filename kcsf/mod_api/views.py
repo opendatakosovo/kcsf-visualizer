@@ -24,52 +24,76 @@ def route():
 
 
 def aggregation(tipi, match_str=None):
-    match_fields = {}
     questions_array = []
     for i in range(1, 99):
         questions_array.append("q" + str(i))
 
+    match_fields = {}
+    match_in_array = []
     if match_str:
-        match_in_array = []
         json_obj = json_util.loads(match_str)
         for item in json_obj:
             if item[:-1] == "municipality":
                 match_in_array.append(slugify(json_obj[item]))
                 match_fields["organisation.municipality.slug"] = {
-                    "$in": match_in_array
+                    "$in": match_in_array,
+                    "$nin": [""]
                 }
             if item[:-1] == "type":
                 match_in_array.append(json_obj[item])
                 match_fields["organisation.type"] = {
-                    "$in": match_in_array
+                    "$in": match_in_array,
+                    "$nin": [""]
                 }
             if item[:-1] == "year":
                 match_in_array.append(int(json_obj[item]))
                 match_fields["organisation.foundingYear"] = {
-                    "$in": match_in_array
+                    "$in": match_in_array,
+                    "$nin": [""]
                 }
             if item[:-1] == "isRegistered":
                 match_in_array.append(json_obj[item])
                 match_fields["organisation.registered.isRegistered"] = {
-                    "$in": match_in_array
+                    "$in": match_in_array,
+                    "$nin": [""]
                 }
             if item[:-1] == "registration-form":
                 match_in_array.append(json_obj[item])
                 match_fields["organisation.registered.registrationForm"] = {
-                    "$in": match_in_array
+                    "$in": match_in_array,
+                    "$nin": [""]
                 }
             if item[:-1] in questions_array:
                 match_in_array.append(json_obj[item])
                 match_fields["organisation.%s.answer" % item[:-1]] = {
-                    "$in": match_in_array
+                    "$in": match_in_array,
+                    "$nin": [""]
                 }
     else:
-        match_fields["organisation.municipality.slug"] = {
-            "$nin": [""]
-        }
-        match_fields["organisation.type"] = {
-            "$nin": [""]
-        }
+        if tipi == "municipality":
+            match_fields["organisation.%s.name" % tipi] = {
+                    "$nin": [""]
+                }
+        if tipi == "type":
+            match_fields["organisation.type"] = {
+                "$nin": [""]
+            }
+        if tipi == "year":
+            match_fields["organisation.foundingYear"] = {
+                "$nin": [""]
+            }
+        if tipi == "isRegistered":
+            match_fields["organisation.registered.isRegistered"] = {
+                "$nin": [""]
+            }
+        if tipi == "registration-form":
+            match_fields["organisation.registered.registrationForm"] = {
+                "$nin": [""]
+            }
+        if tipi in questions_array:
+            match_fields["organisation.%s.answer" % tipi] = {
+                        "$nin": [""]
+                }
 
     group_variable = ""
     questions_with_array_answers = [
@@ -103,9 +127,7 @@ def aggregation(tipi, match_str=None):
             group_variable = "organisation.foundingYear"
         elif tipi == "registration-form":
             group_variable = "organisation.registered.registrationForm"
-        match_fields[group_variable] = {
-                "$nin": [""]
-            }
+
         match = {
             "$match": match_fields
         }
@@ -126,9 +148,6 @@ def aggregation(tipi, match_str=None):
         if tipi not in questions_with_array_answers:
             group_variable = "organisation.%s.answer" % tipi
 
-            match_fields[group_variable] = {
-                    "$nin": [""]
-                }
             match = {
                 "$match": match_fields
             }
@@ -150,9 +169,6 @@ def aggregation(tipi, match_str=None):
                 "$unwind": "$%s" % group_variable
             }
 
-            match_fields[group_variable] = {
-                    "$nin": [""]
-                }
             match = {
                 "$match": match_fields
             }
