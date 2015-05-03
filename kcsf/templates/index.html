@@ -16,7 +16,6 @@
       background-color: #222222;
       color: #333;
     }
-
     #button ul {
       list-style: none;
       margin: 0;
@@ -38,16 +37,13 @@
       text-decoration: none;
       width: 100%;
     }
-
     html>body #button li a {
       width: auto;
     }
-
     #button li a:hover {
       background-color: #2586d7;
       color: #fff;
     }
-
     #question-list{
       color: #FFF;
       line-height: 2em;
@@ -57,7 +53,6 @@
       overflow-x: hidden;
       height: 270px;
     }
-
     #question-list li{
       padding: 0 0 0 5px;
       color: #fff;
@@ -68,14 +63,12 @@
       background-color: #2586d7;
       text-decoration: underline;
     }
-
     .label-class{
       font-family: 'Trebuchet MS', 'Lucida Grande', Verdana, Arial, sans-serif;
       background-color: #222222;
       color: #FFF;
       margin: 3px 0 0 0;
     }
-
     .ui-button:hover{
           border-color:#157BB6;
     }
@@ -85,7 +78,6 @@
           color: #FFFFFF;
           font-weight: bold;
        }
-
     #raporte-te-gatshme{
       color:#000;
       text-decoration: none;
@@ -98,16 +90,13 @@
     #popup-confirm{
       padding: 5px 0 0 10px;
     }
-
     #popup-confirm li{
       padding: 5px 0 0 0;
     }
-
     #popup-confirm li:hover{
       cursor: pointer;
       color: #157BB6;
     }
-
     .clear{
       color: #fff;
       font-size: 12px;
@@ -118,7 +107,6 @@
       cursor: pointer;
       color: #157BB6;
     }
-
     hr.style17 { 
       border: 0; 
       height: 1px; 
@@ -127,18 +115,16 @@
       background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
       background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0); 
     }
-
   </style>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
       var dataTable = null;
-
       function drawChart(containerID, question, downloadLInk, url){
         var chart_type = $('#chart-type-select').val();
         $.get(url, function(results){
           dataTable = new google.visualization.DataTable();
           dataTable.addColumn('string', 'Type', 'Type');
-          dataTable.addColumn('number', 'Totali', 'Totali');
+          dataTable.addColumn('number', '', '');
           dataTable.addColumn({type: 'number', role: 'annotation'});
           for(var idx in results){
             var type = results[idx]['type'];
@@ -146,26 +132,24 @@
             type = type.toString();
             dataTable.addRow([type, sum, sum]);
           }
-
           var formatter = new google.visualization.NumberFormat({
               fractionDigits: 2,
               suffix: '%'
           });
           
-
           var options = {
             title: getTitleOfChart(question),
             displayAnnotations: true
           };
-
           if (chart_type == "pie"){
             var chart = new google.visualization.PieChart(document.getElementById(containerID));
           } else if(chart_type == "column") {
+            options['legend'] = {position: 'none'};
             var chart = new google.visualization.ColumnChart(document.getElementById(containerID));
           } else if(chart_type == "line") {
+            options['legend'] = {position: 'none'};
             var chart = new google.visualization.LineChart(document.getElementById(containerID));
           } 
-
           google.visualization.events.addListener(chart, 'ready', function () {
             var imgUri = chart.getImageURI();
             $("#" + downloadLInk).click(function (event) {
@@ -176,7 +160,6 @@
           chart.draw(dataTable, options);
         })
       };
-
       function hasDuplicates(array) {
             var valuesSoFar = {};
             for (var i = 0; i < array.length; ++i) {
@@ -188,7 +171,6 @@
             }
             return false;
         }
-
       $(document).ready(function(){
         for (var i in questions){
            if ($.inArray(i, questions_with_many_answers) == -1){
@@ -201,14 +183,11 @@
             $("#questions").append(li);
           }
         }
-
         $( ".cbp-spmenu-vertical-item-parent" ).click(function() {
           var elemId = $(this).attr('id');
-
           if(elemId == "dates"){
             elemId = $('.chart-type:checked').val() + "-" + elemId;
           }
-
           if ( $( ".cbp-spmenu-vertical-item-child#" + elemId ).is( ":hidden" ) ) {
             $( ".cbp-spmenu-vertical-item-child#" + elemId ).slideDown( "fast", function() {
               // Animation complete.
@@ -221,17 +200,14 @@
             $( ".cbp-spmenu-vertical-item-parent#" + elemId ).css( "background-color", "")
           }
         });
-
         $( "#question-list li" ).click(function(){
           var id = $(this).attr('data-value');
           $('question-list li ul').css('display', "block");
         });
-
         $( "#question-list li" ).draggable({
           appendTo: "body",
           helper: "clone"
         });
-
         $('#droppable-items-match').droppable({
           activeClass: "ui-state-default",
           hoverClass: "ui-state-hover",
@@ -247,9 +223,7 @@
             //$( "<li class='data-values'></li>" ).text( ui.draggable.text() ).appendTo( this );
             //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
         });
-
         
-
         $( "#cart ol" ).droppable({
           activeClass: "ui-state-default",
           hoverClass: "ui-state-hover",
@@ -264,7 +238,6 @@
             //$('.data-values').attr('data-value', ui.draggable.attr('data-value'));
           }
         });
-
         $(document).on('dblclick', '.cbp-spmenu-vertical-item-parent', function() {
           $('#cart ol').find( ".placeholder" ).remove();
           var question_id = $(this).attr('data-value');
@@ -272,7 +245,6 @@
           var li_rebuild = "<li data-value='"+ question_id +"'>" + question_text + "</li>";
           addToListNoId("#cart ol", li_rebuild, question_text);
         });
-
         $(document).on('dblclick', '.cbp-spmenu-vertical-item-child', function() {
           $('#droppable-items-match').find( ".placeholder" ).remove();
           var id = $(this).attr('id');
@@ -281,7 +253,6 @@
           var li_rebuild = "<li id='" + $(this).attr('id') + "' data-value='"+ question_id +"' data-toggle='tooltip' data-placement='bottom' title='"+ getQuestionInList(id)+"'>" + question_text + "</li>";
           addToList('#droppable-items-match', li_rebuild, id, question_id);
         });
-
         $('#btn_filter').click(function(){
             drawChartOnClick();
         })
@@ -298,17 +269,14 @@
           $('#cart ol').empty();
           $('#cart ol').append('<li class="placeholder">Vendoseni këtu pyetjen !</li>');
         });
-
         $('#btn_clear_match').click(function(){
           var li = '<li class="placeholder">Vendoseni këtu kriterin per filtrim !</li>';
           clearBox('droppable-items-match', li)
         })
-
         $('#btn_clear_group').click(function(){
           var li = '<li class="placeholder">Vendoseni këtu pyetjen !</li>';
           clearBox('droppable-items', li)
         })
-
         $( "#download-excel" ).click(function(){
           var q_id = $("#droppable-items li").attr('data-value');
           var dateTime = new Date();
@@ -317,7 +285,6 @@
           $('#download-excel').prop('href', url);
           $('#download-excel').prop('download', downloadAttr);
         });
-
         $( "#download-csv" ).click(function(){
           var csvContent = "data:text/csv;charset=utf-8,";
           dataTable.removeColumn(2);
@@ -325,11 +292,9 @@
           var encodedCsvUri = encodeURI(csvContent);
           window.open(encodedCsvUri);
         });
-
         $('#chart-type-select').change(function(){
             drawChartOnClick();
         });
-
         $('#raporte-te-gatshme').click(function(){
           $('#raporte-te-gatshme-list').empty();
           for (var i=0; i<raporte_te_gatshme_array.length; i++){
@@ -352,7 +317,6 @@
                   of: $('#raporte-te-gatshme')
                 }
             });
-
           $('#popup-confirm li').click(function(){
             $('#cart ol').empty();
             $('#cart ol').find( ".placeholder" ).remove();
@@ -366,10 +330,10 @@
             var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a +"<br><br><br><br><br><br><br><br><br></div>";
             $('#charts').append(div);
             var url = "{{url_for('api.route')}}" + "?questionID=" + question_id;
+            $('#blank_fields').css('display', 'none');
             drawChart("chart_display0", question_id, "link1", url);
           });
         })
-
         $( "#match li" ).draggable({
           appendTo: "body",
           containment: $(document)
@@ -380,7 +344,6 @@
         $( "#" + ul ).empty();
         $( "#" + ul ).append(li);
       }
-
       function addToList(ul, append, id, dataValue) {
            var addit = true;
            $(ul+" li").each(function()
@@ -406,58 +369,52 @@
            if(addit)
                $(ul).append(append);
          }
-
       function drawChartOnClick(){
         $('#charts').empty();
-        var div_array_Ids = [];
-        var download_button_array_Ids = [];
-        var question_values_array_Ids = [];
-        var id_array_Ids_match = [];
-        var question_values_array_Ids_match = [];
-        var match_final = {"tipi": {"questionID": ""}, "match": {}};
+            var div_array_Ids = [];
+            var download_button_array_Ids = [];
+            var question_values_array_Ids = [];
+            var id_array_Ids_match = [];
+            var question_values_array_Ids_match = [];
+            var match_final = {};
+            $( "#droppable-items li" ).each(function( index ) {
+              var vlera = $(this).attr('data-value');
+              question_values_array_Ids.push(vlera);
+              var containerID = "chart_display" + index;
+              var downloadLink = "link" + index;
+              div_array_Ids.push(containerID);
+              download_button_array_Ids.push(downloadLink);
+            });
+            $( "#droppable-items-match li" ).each(function( index ) {
+              var vlera_match = $(this).attr('data-value');
+              var q_id_match = $(this).attr('id');
+              id_array_Ids_match.push(q_id_match);
+              question_values_array_Ids_match.push(vlera_match);
+              match_final[q_id_match + index] = vlera_match;
+            });
 
-        var ind = 0;
-        $( "#droppable-items li" ).each(function( index ) {
-          var vlera = $(this).attr('data-value');
-          question_values_array_Ids.push(vlera);
-          var containerID = "chart_display" + index;
-          var downloadLink = "link" + index;
-          div_array_Ids.push(containerID);
-          download_button_array_Ids.push(downloadLink);
-          ind = ind + 1;
-        });
-
-        $( "#droppable-items-match li" ).each(function( index ) {
-          var vlera_match = $(this).attr('data-value');
-          var q_id_match = $(this).attr('id');
-          id_array_Ids_match.push(q_id_match);
-          question_values_array_Ids_match.push(vlera_match);
-          match_final['match'][q_id_match + index] = vlera_match;
-        });
-
-        if (question_values_array_Ids[0] != undefined){
-          $('#blank_fields').css('display', 'none');
-          for (var i = 0; i < div_array_Ids.length; i++){
-            match_final['tipi']['questionID'] = question_values_array_Ids[i];
-            var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
-            var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
-            $('#charts').append(div);
-            if(question_values_array_Ids[i] != undefined){
-              var match_string = JSON.stringify(match_final);
-              var url = "";
-              if (match_string.length > 2){
-                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
-                
-              } else {
-                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
+          if (question_values_array_Ids[0] != undefined){
+            $('#blank_fields').css('display', 'none');
+              for (var i = 0; i < div_array_Ids.length; i++){
+                var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
+                var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
+                $('#charts').append(div);
+                if(question_values_array_Ids[i] != undefined){
+                  var match_string = JSON.stringify(match_final);
+                  var url = "";
+                  if (match_string.length > 2){
+                    url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
+                    
+                  } else {
+                    url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
+                  }
+                  drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
+                }
               }
-              drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
-            }
+          } else {
+            $('#blank_fields').css('display', 'block');
           }
-        } else {
-          $('#blank_fields').css('display', 'block');
-        }
-      }
+       }
     </script>
 <div id="index-container" style="width:1180px; margin:-20px 100px 0 -100px; padding-top:100px; height:100%;">
   <div class="row col-md-13" style="border-top-left-radius: 5px; height: 700px;">
@@ -545,8 +502,7 @@
         <h4 id="blank_fields" style="height:200px; width: 100%; margin: 200px; 550px 0 150px; color: red; display: none;">Ju lutemi plotësoni fushat për filtrim dhe grupim. !</h4>
         <div id="charts">
           <div id="chart">
-            <div id="piechart" style="width:800px; height:400px;">
-            </div>
+            <div id="piechart" style="width:800px; height:400px;"></div>
             <a id="link1" href="" class="col-xs-offset-4 btn btn-success" style="width: 145px">Shkarko grafikonin</a>
             <br><br><br><br><br><br><br><br><br><br>
           </div>
