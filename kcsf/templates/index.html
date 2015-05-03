@@ -409,45 +409,54 @@
 
       function drawChartOnClick(){
         $('#charts').empty();
-            var div_array_Ids = [];
-            var download_button_array_Ids = [];
-            var question_values_array_Ids = [];
-            var id_array_Ids_match = [];
-            var question_values_array_Ids_match = [];
-            var match_final = {};
+        var div_array_Ids = [];
+        var download_button_array_Ids = [];
+        var question_values_array_Ids = [];
+        var id_array_Ids_match = [];
+        var question_values_array_Ids_match = [];
+        var match_final = {"tipi": {"questionID": ""}, "match": {}};
 
-            $( "#droppable-items li" ).each(function( index ) {
-              var vlera = $(this).attr('data-value');
-              question_values_array_Ids.push(vlera);
-              var containerID = "chart_display" + index;
-              var downloadLink = "link" + index;
-              div_array_Ids.push(containerID);
-              download_button_array_Ids.push(downloadLink);
-            });
+        var ind = 0;
+        $( "#droppable-items li" ).each(function( index ) {
+          var vlera = $(this).attr('data-value');
+          question_values_array_Ids.push(vlera);
+          var containerID = "chart_display" + index;
+          var downloadLink = "link" + index;
+          div_array_Ids.push(containerID);
+          download_button_array_Ids.push(downloadLink);
+          ind = ind + 1;
+        });
 
-            $( "#droppable-items-match li" ).each(function( index ) {
-              var vlera_match = $(this).attr('data-value');
-              var q_id_match = $(this).attr('id');
-              id_array_Ids_match.push(q_id_match);
-              question_values_array_Ids_match.push(vlera_match);
-              match_final[q_id_match + index] = vlera_match;
-            });
-            for (var i = 0; i < div_array_Ids.length; i++){
-              var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
-              var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
-              $('#charts').append(div);
-              if(question_values_array_Ids[i] != undefined){
-                var match_string = JSON.stringify(match_final);
-                var url = "";
-                if (match_string.length > 2){
-                  url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
-                  
-                } else {
-                  url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
-                }
-                drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
+        $( "#droppable-items-match li" ).each(function( index ) {
+          var vlera_match = $(this).attr('data-value');
+          var q_id_match = $(this).attr('id');
+          id_array_Ids_match.push(q_id_match);
+          question_values_array_Ids_match.push(vlera_match);
+          match_final['match'][q_id_match + index] = vlera_match;
+        });
+
+        if (question_values_array_Ids[0] != undefined){
+          $('#blank_fields').css('display', 'none');
+          for (var i = 0; i < div_array_Ids.length; i++){
+            match_final['tipi']['questionID'] = question_values_array_Ids[i];
+            var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
+            var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
+            $('#charts').append(div);
+            if(question_values_array_Ids[i] != undefined){
+              var match_string = JSON.stringify(match_final);
+              var url = "";
+              if (match_string.length > 2){
+                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
+                
+              } else {
+                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
               }
+              drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
             }
+          }
+        } else {
+          $('#blank_fields').css('display', 'block');
+        }
       }
     </script>
 <div id="index-container" style="width:1180px; margin:-20px 100px 0 -100px; padding-top:100px; height:100%;">
@@ -533,6 +542,7 @@
           </ol>
         </div>
         <br>
+        <h4 id="blank_fields" style="height:200px; width: 100%; margin: 200px; 550px 0 150px; color: red; display: none;">Ju lutemi plotësoni fushat për filtrim dhe grupim. !</h4>
         <div id="charts">
           <div id="chart">
             <div id="piechart" style="width:800px; height:400px;"></div>
