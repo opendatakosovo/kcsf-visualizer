@@ -41,8 +41,12 @@ def export_reports():
     if(len(request.args) > 0):
         question = request.args.get('questionID')
         questionTittle = request.args.get('questionTitle')
+        data = request.args.get('data')
 
-    aggregation = mod_api.views.aggregation(question)
+    if data:
+        aggregation = mod_api.views.aggregation(question, data)
+    else:
+        aggregation = mod_api.views.aggregation(question)
     fn = create_report(aggregation, questionTittle)
     path = os.path.join(current_app.config['EXCEL_DOC_DIR'], fn)
     return send_file(path, mimetype='application/vnd.ms-excel')

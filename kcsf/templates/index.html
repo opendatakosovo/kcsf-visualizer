@@ -280,11 +280,29 @@
         $( "#download-excel" ).click(function(){
           var q_id = $("#droppable-items li").attr('data-value');
           var dateTime = new Date();
-          var url = "{{url_for('exports.export_reports')}}"+"?questionID=" + q_id + "&questionTitle=" + getTitleOfChart(q_id);
+          var id_array_Ids_match = [];
+          var question_values_array_Ids_match = [];
+          var match_final = {};
+          $( "#droppable-items-match li" ).each(function( index ) {
+            var vlera_match = $(this).attr('data-value');
+            var q_id_match = $(this).attr('id');
+            id_array_Ids_match.push(q_id_match);
+            question_values_array_Ids_match.push(vlera_match);
+            match_final[q_id_match + index] = vlera_match;
+          });
+
+          var match_string = JSON.stringify(match_final);
+          var url = "";
+          if (match_string.length > 2){
+            url = "{{url_for('exports.export_reports')}}"+"?questionID=" + q_id + "&questionTitle=" + getTitleOfChart(q_id)  + "&data=" + match_string;
+          } else {
+            url = "{{url_for('exports.export_reports')}}"+"?questionID=" + q_id + "&questionTitle=" + getTitleOfChart(q_id);
+          }
           var downloadAttr = "Reports (As of '" + dateTime + "').xls";
           $('#download-excel').prop('href', url);
           $('#download-excel').prop('download', downloadAttr);
         });
+
         $( "#download-csv" ).click(function(){
           var csvContent = "data:text/csv;charset=utf-8,";
           dataTable.removeColumn(2);
@@ -404,7 +422,6 @@
                   var url = "";
                   if (match_string.length > 2){
                     url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
-                    
                   } else {
                     url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
                   }
