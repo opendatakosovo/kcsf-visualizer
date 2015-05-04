@@ -225,6 +225,7 @@
           appendTo: "body",
           helper: "clone"
         });
+
         $('#droppable-items-match').droppable({
           activeClass: "ui-state-default",
           hoverClass: "ui-state-hover",
@@ -388,10 +389,6 @@
             $('#blank_fields').css('display', 'none');
             drawChart("chart_display0", question_id, "link1", url);
           });
-        })
-        $( "#match li" ).draggable({
-          appendTo: "body",
-          containment: $(document)
         });
       });
       
