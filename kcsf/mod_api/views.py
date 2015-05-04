@@ -29,44 +29,37 @@ def aggregation(tipi, match_str=None):
         questions_array.append("q" + str(i))
 
     match_fields = {}
-    match_in_array = []
     if match_str:
         json_obj = json_util.loads(match_str)
         for item in json_obj:
-            if item[:-1] == "municipality":
-                match_in_array.append(slugify(json_obj[item]))
-                match_fields["organisation.municipality.slug"] = {
-                    "$in": match_in_array,
+            if item == "municipality":
+                match_fields["organisation.municipality.name"] = {
+                    "$in": json_obj[item],
                     "$nin": [""]
                 }
-            if item[:-1] == "type":
-                match_in_array.append(json_obj[item])
+            if item == "type":
                 match_fields["organisation.type"] = {
-                    "$in": match_in_array,
+                    "$in": json_obj[item],
                     "$nin": [""]
                 }
-            if item[:-1] == "year":
-                match_in_array.append(int(json_obj[item]))
+            if item == "year":
                 match_fields["organisation.foundingYear"] = {
-                    "$in": match_in_array,
+                    "$in": json_obj[item],
                     "$nin": [""]
                 }
-            if item[:-1] == "isRegistered":
-                match_in_array.append(json_obj[item])
+            if item == "isRegistered":
                 match_fields["organisation.registered.isRegistered"] = {
-                    "$in": match_in_array,
+                    "$in": json_obj[item],
                     "$nin": [""]
                 }
-            if item[:-1] == "registration-form":
-                match_in_array.append(json_obj[item])
+            if item == "registration-form":
                 match_fields["organisation.registered.registrationForm"] = {
-                    "$in": match_in_array,
+                    "$in": json_obj[item],
                     "$nin": [""]
                 }
-            if item[:-1] in questions_array:
-                match_in_array.append(json_obj[item])
-                match_fields["organisation.%s.answer" % item[:-1]] = {
-                    "$in": match_in_array,
+            if item in questions_array:
+                match_fields["organisation.%s.answer" % item] = {
+                    "$in": json_obj[item],
                     "$nin": [""]
                 }
     else:

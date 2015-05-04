@@ -1033,6 +1033,12 @@ function getTitleOfChart(q_nr){
     }
 }
 
+var json_object = {}
+var array = [];
+for(var i in questions){
+    json_object[i] = [];
+}
+
 function getQuestionInList(q_nr){
     return questions[q_nr]['questionInList'];
 }
