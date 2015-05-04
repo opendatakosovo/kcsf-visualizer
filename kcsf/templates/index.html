@@ -1,9 +1,26 @@
-{% extends "layout.html" %}
-{% block body %}
-  <script src="http://code.highcharts.com/highcharts.js"></script>
-  <script src="http://code.highcharts.com/modules/exporting.js"></script>
-  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script src="{{ url_for('static', filename='utils.js') }}"></script>
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vizualizimet - KCSF - Kosovar Civil Society Foundation</title>
+
+<script src="{{ url_for('static', filename='bootstrap/js/jquery.js') }}"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
+<link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="http://www.kcsfoundation.org/inc/css/style.css" type="text/css" title="standard" />
+<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+
+<script type="text/javascript" src="http://www.kcsfoundation.org/inc/js/jquery-ui-1.9.2.custom.min.js"></script>
+
+
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+</head>
+<body>
+    <div id="entirebody">     
+      <div id="container"><!-- start of container -->
+      <script src="{{ url_for('static', filename='utils.js') }}"></script>
 
 <link href="{{ url_for('static', filename='jquery-ui-1.11.4/jquery-ui.min.css') }}" rel="stylesheet" media="All">
   <style type="text/css">
@@ -213,7 +230,7 @@
           hoverClass: "ui-state-hover",
           accept: ":not(.ui-sortable-helper)",
           drop: function( event, ui ) {
-            var append = "<li id='" + ui.draggable.attr('id') + "' data-value='" + ui.draggable.attr('data-value') + "' class='data-values' data-toggle='tooltip' data-placement='bottom' title='"+ getQuestionInList(ui.draggable.attr('id'))+"'>"+ ui.draggable.text() +"</li>";
+            var append = "<li id='" + ui.draggable.attr('id') + "' data-value='" + ui.draggable.attr('data-value') + "' data-toggle='tooltip' data-placement='bottom' title='"+ getQuestionInList(ui.draggable.attr('id'))+"'>"+ ui.draggable.text() +"</li>";
             if (ui.draggable.attr('class') == 'cbp-spmenu-vertical-item-child ui-draggable'){
             $( this ).find( ".placeholder" ).remove();
               addToList('#droppable-items-match', append, ui.draggable.attr('id'), ui.draggable.attr('data-value'));
@@ -229,7 +246,7 @@
           hoverClass: "ui-state-hover",
           accept: ":not(.ui-sortable-helper)",
           drop: function( event, ui ) {
-            var append = "<li data-value='" + ui.draggable.attr('data-value') + "' class='data-values'>"+ ui.draggable.text() +"</li>";
+            var append = "<li data-value='" + ui.draggable.attr('data-value') + "'>"+ ui.draggable.text() +"</li>";
             if (ui.draggable.attr('class') == 'cbp-spmenu-vertical-item-parent ui-draggable'){
               $( this ).find( ".placeholder" ).remove();
               addToListNoId("#cart ol", append, ui.draggable.text());
@@ -278,70 +295,6 @@
           clearBox('droppable-items', li)
         })
         $( "#download-excel" ).click(function(){
-          /*
-          var id_array_Ids_match = [];
-        var question_values_array_Ids_match = [];
-        var match_final = {};
-        $( "#droppable-items li" ).each(function( index ) {
-          var vlera = $(this).attr('data-value');
-          question_values_array_Ids.push(vlera);
-          var containerID = "chart_display" + index;
-          var downloadLink = "link" + index;
-          div_array_Ids.push(containerID);
-          download_button_array_Ids.push(downloadLink);
-        });
-
-        if ($('#droppable-items-match li').attr('class') == undefined){
-          $( "#droppable-items-match li" ).each(function( index ) {
-            var vlera_match = $(this).attr('data-value');
-            var q_id_match = $(this).attr('id');
-            id_array_Ids_match.push(q_id_match);
-            question_values_array_Ids_match.push(vlera_match);
-            json_object[q_id_match].push(vlera_match);
-            //match_final[q_id_match + index] = vlera_match;
-          });
-          for (var i in json_object){
-            if (json_object[i].length != 0){
-              var uniqueValues = [];
-              $.each(json_object[i], function(j, el){
-                  if($.inArray(el, uniqueValues) === -1) uniqueValues.push(el);
-              });
-              match_final[i] = uniqueValues;
-            }
-          }
-        }
-
-        if ( $('#droppable-items li').length >= 1 && $('#droppable-items li').attr('class') == undefined){
-          $('#charts').empty();
-          $('#blank_fields').css('display', 'none');
-          for (var i = 0; i < div_array_Ids.length; i++){
-            var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
-            var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
-            $('#charts').append(div);
-            if(question_values_array_Ids[i] != undefined){
-              var match_string = JSON.stringify(match_final);
-              var url = "";
-              if (match_string.length > 2){
-                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
-              } else {
-                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
-              }
-              drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
-            }
-          }
-        } else {
-          $('#charts').empty();
-          $('#blank_fields').css('display', 'block');
-        }
-
-        for (var i in json_object){
-          if (json_object[i].length != 0){
-            json_object[i] = [];
-          }
-        }
-          */
-
-
 
           var q_id = $("#droppable-items li").attr('data-value');
           var dateTime = new Date();
@@ -537,7 +490,7 @@
         }
       }
     </script>
-<div id="index-container" style="width:1180px; margin:-20px 100px 0 -100px; padding-top:100px; height:100%;">
+<div id="index-container" style="width:1180px; margin:-40px 100px 0 -100px; padding-top:100px; height:100%;">
   <div class="row col-md-13" style="border-top-left-radius: 5px; height: 700px;">
     <div id="left-menu" class="col-md-3" style="background-color: #222222; height: 100%;">
       <div id="filter" style="height: 650px;">
@@ -578,9 +531,9 @@
                 </div>
              </div>
             </li>
-            <li style="margin-top:5px;">
+            <li style="margin-top:10px; padding: 0 0 10px 0;">
               <button style="margin-left: 65px;" id="btn_filter" class="btn btn-primary">Filtroni</button>
-              <button style="" id="btn_clear_questionbox" class="btn btn-primary">Fshini</button><br>
+              <button style="" id="btn_clear_questionbox" class="btn btn-primary">Fshini</button>
           </ul>
         </div>
       </div>
@@ -633,4 +586,7 @@
   </div>
     <hr style="width:100%; color:black;">
 </div>
-{% endblock %}
+      </div><!-- end of container -->
+    </div><!-- end of entirebody -->
+    
+</body></html>
