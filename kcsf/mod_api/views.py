@@ -128,6 +128,13 @@ def aggregation(tipi, match_str=None):
         elif tipi == "registration-form":
             group_variable = "organisation.registered.registrationForm"
 
+        if group_variable in match_fields:
+            match_fields[group_variable]['$nin'].append("")
+        else:
+            match_fields[group_variable] = {
+                "$nin": [""]
+            }
+
         match = {
             "$match": match_fields
         }
@@ -147,6 +154,13 @@ def aggregation(tipi, match_str=None):
     else:
         if tipi not in questions_with_array_answers:
             group_variable = "organisation.%s.answer" % tipi
+
+            if group_variable in match_fields:
+                match_fields[group_variable]['$nin'].append("")
+            else:
+                match_fields[group_variable] = {
+                    "$nin": [""]
+                }
 
             match = {
                 "$match": match_fields
@@ -168,6 +182,13 @@ def aggregation(tipi, match_str=None):
             unwind = {
                 "$unwind": "$%s" % group_variable
             }
+
+            if group_variable in match_fields:
+                match_fields[group_variable]['$nin'].append("")
+            else:
+                match_fields[group_variable] = {
+                    "$nin": [""]
+                }
 
             match = {
                 "$match": match_fields
