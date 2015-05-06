@@ -135,11 +135,10 @@
   </style>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
-      var dataTable = null;
       function drawChart(containerID, question, downloadLInk, url){
+        var dataTable = new google.visualization.DataTable();
         var chart_type = $('#chart-type-select').val();
         $.get(url, function(results){
-          dataTable = new google.visualization.DataTable();
           dataTable.addColumn('string', 'Type', 'Type');
           dataTable.addColumn('number', '', '');
           dataTable.addColumn({type: 'number', role: 'annotation'});
@@ -176,7 +175,17 @@
           });
           chart.draw(dataTable, options);
         })
+        return dataTable
       };
+
+      function dataTableToCsv(dataTable){
+        var csvContent = "data:text/csv;charset=utf-8,";
+        dataTable.removeColumn(2);
+        var csvContent = csvContent + google.visualization.dataTableToCsv(dataTable);
+        var encodedCsvUri = encodeURI(csvContent);
+        window.open(encodedCsvUri);
+      }
+
       function hasDuplicates(array) {
             var valuesSoFar = {};
             for (var i = 0; i < array.length; ++i) {
@@ -276,10 +285,12 @@
         })
         
         
-        
         url = "{{url_for('api.route')}}" + "?questionID=municipality";
-        drawChart("piechart", 'municipality', 'link1', url);
+        var dataTable = drawChart("piechart", 'municipality', 'link1', url);
         //drawPieChart();
+        $( "#csv").click(function(){
+          dataTableToCsv(dataTable);
+        });
         
         $('#btn_clear_questionbox').click(function(){
           $( "#droppable-items-match" ).empty();
@@ -295,59 +306,11 @@
           var li = '<li class="placeholder">Vendoseni këtu pyetjen !</li>';
           clearBox('droppable-items', li)
         })
-        $( "#download-excel" ).click(function(){
-
-          var q_id = $("#droppable-items li").attr('data-value');
-          var dateTime = new Date();
-          var id_array_Ids_match = [];
-          var question_values_array_Ids_match = [];
-          var match_final = {};
-
-          if ($('#droppable-items-match li').attr('class') == undefined){
-            $( "#droppable-items-match li" ).each(function( index ) {
-              var vlera_match = $(this).attr('data-value');
-              var q_id_match = $(this).attr('id');
-              id_array_Ids_match.push(q_id_match);
-              question_values_array_Ids_match.push(vlera_match);
-              json_object[q_id_match].push(vlera_match);
-              //match_final[q_id_match + index] = vlera_match;
-            });
-            for (var i in json_object){
-              if (json_object[i].length != 0){
-                var uniqueValues = [];
-                $.each(json_object[i], function(j, el){
-                    if($.inArray(el, uniqueValues) === -1) uniqueValues.push(el);
-                });
-                match_final[i] = uniqueValues;
-              }
-            }
-          }
-
-          var match_string = JSON.stringify(match_final);
-          var url = "";
-          if (match_string.length > 2){
-            url = "{{url_for('exports.export_reports')}}"+"?questionID=" + q_id + "&questionTitle=" + getTitleOfChart(q_id)  + "&data=" + match_string;
-          } else {
-            url = "{{url_for('exports.export_reports')}}"+"?questionID=" + q_id + "&questionTitle=" + getTitleOfChart(q_id);
-          }
-          var downloadAttr = "Reports (As of '" + dateTime + "').xls";
-          $('#download-excel').prop('href', url);
-          $('#download-excel').prop('download', downloadAttr);
-
-          for (var i in json_object){
-            if (json_object[i].length != 0){
-              json_object[i] = [];
-            }
-          }
+        $( "#excel1" ).click(function(){
+          var url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=municipality&questionTitle=Qyteti";
+          $('#excel1').prop('href', url_excel);
         });
 
-        $( "#download-csv" ).click(function(){
-          var csvContent = "data:text/csv;charset=utf-8,";
-          dataTable.removeColumn(2);
-          var csvContent = csvContent + google.visualization.dataTableToCsv(dataTable);
-          var encodedCsvUri = encodeURI(csvContent);
-          window.open(encodedCsvUri);
-        });
         $('#chart-type-select').change(function(){
             drawChartOnClick();
         });
@@ -373,6 +336,7 @@
                   of: $('#raporte-te-gatshme')
                 }
             });
+
           $('#popup-confirm li').click(function(){
             $('#cart ol').empty();
             $('#cart ol').find( ".placeholder" ).remove();
@@ -382,12 +346,25 @@
             $("#cart ol").append(li_rebuild);
             $('#popup-confirm').dialog('close');
             $('#charts').empty();
-            var a = "<a id='link1' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
-            var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a +"<br><br><br><br><br><br><br><br><br></div>";
+            /*
+            var a = "<a id='" + download_button_array_Ids[i] + "' class='btn btn-sm btn-success' style='margin-left: 200px; width: 125px'>Shkarko grafikonin</a>";
+            var download_excel = "<a id='excel"+i+"' download='Reports.xls' style='margin-left: 5px;' class='btn btn-sm btn-success'>Excel Data</a>";
+            var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a + "" + download_excel +"<hr class='style17'></div>";
+            $('#charts').append(div);
+            */
+            var download_csv = "<a id='csv_ready' style='margin-left: 5px;' class='btn btn-sm btn-success'>CSV Data</a>";
+            var download_excel = "<a id='excel' download='Reports.xls' style='margin-left: 5px;' class='btn btn-sm btn-success'>Excel Data</a>";
+            var a = "<a id='link1' class='btn btn-sm btn-success'  style='margin-left: 200px; width: 145px'>Shkarko grafikonin</a>"
+            var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a + "" + download_excel + ""+ download_csv + "<br><br><br><br><br><br><br><br><br></div>";
             $('#charts').append(div);
             var url = "{{url_for('api.route')}}" + "?questionID=" + question_id;
+            var url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_id + "&questionTitle=" + getTitleOfChart(question_id);
             $('#blank_fields').css('display', 'none');
-            drawChart("chart_display0", question_id, "link1", url);
+            $('#excel').prop("href", url_excel);
+            var dataTable = drawChart("chart_display0", question_id, "link1", url);
+            $('#csv_ready').click(function(){
+              dataTableToCsv(dataTable);
+            })
           });
         });
       });
@@ -421,6 +398,7 @@
            if(addit)
                $(ul).append(append);
          }
+
       function drawChartOnClick(){
         var div_array_Ids = [];
         var download_button_array_Ids = [];
@@ -460,19 +438,29 @@
         if ( $('#droppable-items li').length >= 1 && $('#droppable-items li').attr('class') == undefined){
           $('#charts').empty();
           $('#blank_fields').css('display', 'none');
+          var dateTime = new Date();
           for (var i = 0; i < div_array_Ids.length; i++){
-            var a = "<a id='" + download_button_array_Ids[i] + "' class='col-xs-offset-4 btn btn-success' style='width: 145px'>Shkarko grafikonin</a>"
-            var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a +"<hr class='style17'></div>";
+            var download_csv = "<a id='csv"+i+"' style='margin-left: 5px;' class='btn btn-sm btn-success'>CSV Data</a>";
+            var a = "<a id='" + download_button_array_Ids[i] + "' class='btn btn-sm btn-success' style='margin-left: 200px; width: 125px'>Shkarko grafikonin</a>";
+            var download_excel = "<a id='excel"+i+"' download='Reports.xls' style='margin-left: 5px;' class='btn btn-sm btn-success'>Excel Data</a>";
+            var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a + "" + download_excel + "" + download_csv +"<hr class='style17'></div>";
             $('#charts').append(div);
             if(question_values_array_Ids[i] != undefined){
               var match_string = JSON.stringify(match_final);
               var url = "";
+              var url_excel = "";
               if (match_string.length > 2){
+                url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i])  + "&data=" + match_string;
                 url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
               } else {
+                url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i]);
                 url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
               }
-              drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
+              $('#excel' + i).prop("href", url_excel);
+              var dataTable = drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
+              $( "#csv" + i ).click(function(){
+                dataTableToCsv(dataTable);
+              });
             }
           }
         } else {
@@ -487,7 +475,7 @@
         }
       }
     </script>
-<div id="index-container" style="width:1180px; margin:-40px 100px 0 -100px; padding-top:100px; height:100%;">
+<div id="index-container" style="width:1180px; margin:-90px 100px 0 -100px; padding-top:100px; height:100%;">
   <div class="row col-md-13" style="border-top-left-radius: 5px; height: 700px;">
     <div id="left-menu" class="col-md-3" style="background-color: #222222; height: 100%;">
       <div id="filter" style="height: 650px;">
@@ -574,7 +562,9 @@
         <div id="charts">
           <div id="chart">
             <div id="piechart" style="width:800px; height:400px;"></div>
-            <a id="link1" href="" class="col-xs-offset-4 btn btn-success" style="width: 145px">Shkarko grafikonin</a>
+            <a id="link1" href="" class="btn btn-sm btn-success" style="margin-left: 200px; width: 145px">Shkarko grafikonin</a>
+            <a id='excel1' download='Reports.xls' style='margin-left: 5px;' class='btn btn-sm btn-success'>Excel Data</a>
+            <a id='csv' style='margin-left: 5px;' class='btn btn-sm btn-success'>CSV Data</a>
             <br><br><br><br><br><br><br><br><br><br>
           </div>
         </div>
