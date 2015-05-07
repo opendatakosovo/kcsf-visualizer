@@ -2,24 +2,22 @@ from flask import Blueprint
 from flask import Response, request
 from bson import json_util
 from kcsf import mongo
-from slugify import slugify
 
 mod_api = Blueprint('api', __name__, url_prefix='/api')
 
 
-@mod_api.route('/data', methods=['GET'])
+@mod_api.route('/data', methods=['POST'])
 def route():
-    if(len(request.args) > 0):
-        tipi = request.args.get('questionID')
-        data = request.args.get('data')
-
-    if data:
-        json_response = aggregation(tipi, data)
+    json_string = request.data
+    json_obj = json_util.loads(json_string)
+    json_obj_qID = json_obj['questionID']
+    if json_string:
+        json_response = aggregation(json_obj_qID, json_string)
     else:
-        json_response = aggregation(tipi)
+        json_response = aggregation(json_obj_qID)
     resp = Response(
-                response=json_util.dumps(json_response['result']),
-                mimetype='application/json')
+        response=json_util.dumps(json_response['result']),
+        mimetype='application/json')
     return resp
 
 

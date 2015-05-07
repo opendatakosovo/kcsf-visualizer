@@ -135,47 +135,45 @@
   </style>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["corechart"]});
-      function drawChart(containerID, question, downloadLInk, url){
+      function drawChart(containerID, question, downloadLInk, results){
         var dataTable = new google.visualization.DataTable();
         var chart_type = $('#chart-type-select').val();
-        $.get(url, function(results){
-          dataTable.addColumn('string', 'Type', 'Type');
-          dataTable.addColumn('number', '', '');
-          dataTable.addColumn({type: 'number', role: 'annotation'});
-          for(var idx in results){
-            var type = results[idx]['type'];
-            var sum = results[idx]['count'];
-            type = type.toString();
-            dataTable.addRow([type, sum, sum]);
-          }
-          var formatter = new google.visualization.NumberFormat({
-              fractionDigits: 2,
-              suffix: '%'
-          });
-          
-          var options = {
-            title: getTitleOfChart(question),
-            displayAnnotations: true
-          };
-          if (chart_type == "pie"){
-            var chart = new google.visualization.PieChart(document.getElementById(containerID));
-          } else if(chart_type == "column") {
-            options['legend'] = {position: 'none'};
-            var chart = new google.visualization.ColumnChart(document.getElementById(containerID));
-          } else if(chart_type == "line") {
-            options['legend'] = {position: 'none'};
-            var chart = new google.visualization.LineChart(document.getElementById(containerID));
-          } 
-          google.visualization.events.addListener(chart, 'ready', function () {
-            var imgUri = chart.getImageURI();
-            $("#" + downloadLInk).click(function (event) {
-                $('#' + downloadLInk).prop('download', 'Chart.png');
-                $('#' + downloadLInk).prop('href', imgUri);
-            });  
-          });
-          chart.draw(dataTable, options);
-        })
-        return dataTable
+        dataTable.addColumn('string', 'Type', 'Type');
+        dataTable.addColumn('number', '', '');
+        dataTable.addColumn({type: 'number', role: 'annotation'});
+        for(var idx in results){
+          var type = results[idx]['type'];
+          var sum = results[idx]['count'];
+          type = type.toString();
+          dataTable.addRow([type, sum, sum]);
+        }
+        var formatter = new google.visualization.NumberFormat({
+            fractionDigits: 2,
+            suffix: '%'
+        });
+        
+        var options = {
+          title: getTitleOfChart(question),
+          displayAnnotations: true
+        };
+        if (chart_type == "pie"){
+          var chart = new google.visualization.PieChart(document.getElementById(containerID));
+        } else if(chart_type == "column") {
+          options['legend'] = {position: 'none'};
+          var chart = new google.visualization.ColumnChart(document.getElementById(containerID));
+        } else if(chart_type == "line") {
+          options['legend'] = {position: 'none'};
+          var chart = new google.visualization.LineChart(document.getElementById(containerID));
+        } 
+        google.visualization.events.addListener(chart, 'ready', function () {
+          var imgUri = chart.getImageURI();
+          $("#" + downloadLInk).click(function (event) {
+              $('#' + downloadLInk).prop('download', 'Chart.png');
+              $('#' + downloadLInk).prop('href', imgUri);
+          });  
+        });
+        chart.draw(dataTable, options);
+        return dataTable;
       };
 
       function dataTableToCsv(dataTable){
@@ -197,6 +195,22 @@
             }
             return false;
         }
+
+        function postRequest(url_post, post_data, containerID, q_id, chart_downloladID, csv_download){
+          $.ajax({
+            type: 'POST',
+            url: url_post,
+            dataType: 'json',
+            contentType: 'application/json',
+            data: post_data
+          }).done(function(data){
+            var dataTable = drawChart(containerID, q_id, chart_downloladID, data);
+            $('#' + csv_download).click(function(){
+              dataTableToCsv(dataTable);
+            });
+          });
+        }
+
       $(document).ready(function(){
         for (var i in questions){
            if ($.inArray(i, questions_with_many_answers) == -1){
@@ -284,14 +298,12 @@
             drawChartOnClick();
         })
         
+        var url_post = "{{url_for('api.route')}}";
+        var post = { "questionID": "municipality" };
+        var str_post = JSON.stringify(post);
         
-        url = "{{url_for('api.route')}}" + "?questionID=municipality";
-        var dataTable = drawChart("piechart", 'municipality', 'link1', url);
+        postRequest(url_post, str_post, "piechart", "municipality", "link1", 'csv' );
         //drawPieChart();
-        $( "#csv").click(function(){
-          dataTableToCsv(dataTable);
-        });
-        
         $('#btn_clear_questionbox').click(function(){
           $( "#droppable-items-match" ).empty();
           $( "#droppable-items-match" ).append('<li class="placeholder">Vendoseni këtu kriterin per filtrim !</li>');
@@ -357,14 +369,13 @@
             var a = "<a id='link1' class='btn btn-sm btn-success'  style='margin-left: 200px; width: 145px'>Shkarko grafikonin</a>"
             var div = "<div id='chart'><div id='chart_display0' style='width:800px; height:400px;''></div>"+ a + "" + download_excel + ""+ download_csv + "<br><br><br><br><br><br><br><br><br></div>";
             $('#charts').append(div);
-            var url = "{{url_for('api.route')}}" + "?questionID=" + question_id;
-            var url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_id + "&questionTitle=" + getTitleOfChart(question_id);
+            var url = "{{url_for('api.route')}}";
+            var post = {"questionID": question_id};
+            var str_post = JSON.stringify(post);
+            var url_excel = "{{url_for('exports.export_reports')}}"+"?questionID="+question_id+"&questionTitle=" + getTitleOfChart(question_id);
             $('#blank_fields').css('display', 'none');
             $('#excel').prop("href", url_excel);
-            var dataTable = drawChart("chart_display0", question_id, "link1", url);
-            $('#csv_ready').click(function(){
-              dataTableToCsv(dataTable);
-            })
+            postRequest(url, str_post, "chart_display0", question_id, "link1", 'csv_ready');
           });
         });
       });
@@ -445,23 +456,24 @@
             var download_excel = "<a id='excel"+i+"' download='Reports.xls' style='margin-left: 5px;' class='btn btn-sm btn-success'>Excel Data</a>";
             var div = "<div id='chart"+i+"'><div id='" + div_array_Ids[i] + "' style='width:800px; height:400px;''></div>"+ a + "" + download_excel + "" + download_csv +"<hr class='style17'></div>";
             $('#charts').append(div);
-            if(question_values_array_Ids[i] != undefined){
-              var match_string = JSON.stringify(match_final);
-              var url = "";
-              var url_excel = "";
-              if (match_string.length > 2){
-                url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i])  + "&data=" + match_string;
-                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
-              } else {
-                url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i]);
-                url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
-              }
-              $('#excel' + i).prop("href", url_excel);
-              var dataTable = drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
-              $( "#csv" + i ).click(function(){
-                dataTableToCsv(dataTable);
-              });
+            match_final['questionID'] = question_values_array_Ids[i]
+            match_final['questionTitle'] = getTitleOfChart(question_values_array_Ids[i])
+            var match_string = JSON.stringify(match_final);
+            var url = "";
+            var url_excel = "{{url_for('exports.export_reports')}}";
+            var url_post = "{{url_for('api.route')}}";
+            postRequest(url_post, match_string, div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], 'csv' + i);
+            if (match_string.length > 2){
+              url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i])  + "&data=" + match_string;
+            } else {
+              url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i]);
             }
+            $('#excel' + i).prop("href", url_excel);
+            //url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i])  + "&data=" + match_string;
+            //url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i] + "&data=" + match_string;
+            //url_excel = "{{url_for('exports.export_reports')}}"+"?questionID=" + question_values_array_Ids[i] + "&questionTitle=" + getTitleOfChart(question_values_array_Ids[i]);
+            //url = "{{url_for('api.route')}}" + "?questionID=" + question_values_array_Ids[i];
+            //var dataTable = drawChart(div_array_Ids[i], question_values_array_Ids[i], download_button_array_Ids[i], url);
           }
         } else {
           $('#charts').empty();
