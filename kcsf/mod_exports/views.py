@@ -40,7 +40,7 @@ def create_report(q2, response, title, title2):
             worksheet.write(i + 3, 1, tipi1, value_column)
             worksheet.write(i + 3, 2, totali, value_column)
         else:
-            worksheet.write(i + 2, 1, totali, value_column)
+            worksheet.write(i + 3, 1, totali, value_column)
 
     workbook.close()
     return fn
