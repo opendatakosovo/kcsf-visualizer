@@ -326,7 +326,7 @@ questions = {
     },
     "q22" : {
         "answers": ["1", "2", "3-5", "Asnjë", "Më shumë se 5"],
-        "questionInList" : "Organizatat anëtare në rrjeteve, grupe ombrellë ose federata",
+        "questionInList" : "Organizatat anëtare në rrjete, grupe ombrellë ose federata",
         "questionOnTitle" : "Sa është numri i rrjeteve, grupeve ombrellë ose federatave në të cilat organizata juaj është anëtare?"
     },
     "q23" : {
